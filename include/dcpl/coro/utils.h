@@ -8,7 +8,7 @@
 namespace dcpl::coro {
 
 template <typename T = no_value>
-coro_promise<T>* promise_ptr(std::coroutine_handle<> coro) {
+value_base<T>* value_base_ptr(std::coroutine_handle<> coro) {
   auto handle = std::coroutine_handle<coro_promise<T>>::from_address(coro.address());
 
   return &handle.promise();
@@ -16,12 +16,12 @@ coro_promise<T>* promise_ptr(std::coroutine_handle<> coro) {
 
 template <typename T>
 const T& get_value(std::coroutine_handle<> coro) {
-  return promise_ptr<T>(coro)->value();
+  return value_base_ptr<T>(coro)->value();
 }
 
 template <typename T>
 T extract_value(std::coroutine_handle<> coro) {
-  return promise_ptr<T>(coro)->extract_value();
+  return value_base_ptr<T>(coro)->extract_value();
 }
 
 inline void spawn(std::coroutine_handle<> coro) {

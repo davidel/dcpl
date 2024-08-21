@@ -9,6 +9,8 @@
 
 #include "gtest/gtest.h"
 
+#include "dcpl/coro/coro.h"
+#include "dcpl/coro/utils.h"
 #include "dcpl/ivector.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
@@ -435,6 +437,30 @@ TEST(ToStringTest, API) {
 
   ss << v;
   EXPECT_EQ(ss.str(), std::string("182738918229102212"));
+}
+
+dcpl::coro::ns_coro<void*> CoroSelfHandle() {
+  auto handle = co_await dcpl::coro::get_coro_handle();
+
+  co_return handle.address();
+}
+
+TEST(Coro, SelfHandle) {
+  auto cfn = CoroSelfHandle();
+
+  EXPECT_EQ(cfn.value(), cfn.handle().address());
+}
+
+dcpl::coro::ns_coro<void*> CoroSelfPromise() {
+  auto handle = co_await dcpl::coro::get_coro_handle();
+
+  co_return static_cast<void*>(dcpl::coro::value_base_ptr<>(handle));
+}
+
+TEST(Coro, SelfPromise) {
+  auto cfn = CoroSelfPromise();
+
+  EXPECT_EQ(cfn.value(), static_cast<void*>(&cfn.promise()));
 }
 
 }
