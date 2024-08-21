@@ -33,4 +33,3 @@ mapfile::~mapfile() {
 }
 
 }
-

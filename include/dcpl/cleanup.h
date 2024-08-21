@@ -6,7 +6,7 @@ namespace dcpl {
 
 class cleanup {
  public:
-  explicit cleanup(std::function<void ()> fn) :
+  explicit cleanup(std::function<void()> fn) :
       fn_(std::move(fn)) {
   }
 
@@ -21,7 +21,7 @@ class cleanup {
   }
 
  private:
-  std::function<void ()> fn_;
+  std::function<void()> fn_;
 };
 
 }

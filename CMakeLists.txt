@@ -21,8 +21,8 @@ link_directories(
 
 project(dcpl)
 
-file(GLOB DCPL_HEADERS "include/dcpl/*.h")
-file(GLOB DCPL_SOURCES "src/*.cc")
+file(GLOB DCPL_HEADERS "include/dcpl/*.h" "include/dcpl/coro/*.h")
+file(GLOB DCPL_SOURCES "src/*.cc" "src/coro/*.cc")
 
 add_library(dcpl STATIC
   ${DCPL_HEADERS}

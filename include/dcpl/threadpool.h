@@ -149,9 +149,12 @@ result<T> run(const F& fn) {
 
 class threadpool {
  public:
-  using thread_function = std::function<void ()>;
+  using thread_function = std::function<void()>;
 
-  explicit threadpool(std::size_t num_threads) {
+  explicit threadpool(std::size_t num_threads = 0) {
+    if (num_threads == 0) {
+      num_threads = std::thread::hardware_concurrency();
+    }
     threads_.reserve(num_threads);
     for (std::size_t i = 0; i < num_threads; ++i) {
       threads_.push_back(std::make_unique<std::thread>(
@@ -176,6 +179,8 @@ class threadpool {
     function_queue_.push(std::move(thread_fn));
   }
 
+  static threadpool* get();
+
  private:
   void run() {
     for (;;) {
@@ -187,6 +192,8 @@ class threadpool {
       (*thread_fn)();
     }
   }
+
+  static threadpool* create_system_pool();
 
   std::vector<std::unique_ptr<std::thread>> threads_;
   detail::queue<thread_function> function_queue_;

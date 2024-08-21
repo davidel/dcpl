@@ -1,10 +1,10 @@
+#pragma once
+
 #include <sys/mman.h>
 #include <sys/types.h>
 
 #include <span>
 #include <string_view>
-
-#pragma once
 
 namespace dcpl {
 
