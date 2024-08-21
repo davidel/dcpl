@@ -272,7 +272,7 @@ std::vector<T> sequence_comp(const E& ins, const F& fn) {
 
 template <typename B>
 std::vector<B> load_file(const char* path, bool binary) {
-  std::ios::openmode mode = binary ? std::ios::binary : 0;
+  std::ios::openmode mode = binary ? std::ios::binary : std::ios::openmode{};
   std::ifstream in_file(path, /*mode=*/ std::ios::in | mode);
 
   in_file.seekg(0, std::ios::end);
