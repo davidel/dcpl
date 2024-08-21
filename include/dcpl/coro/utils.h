@@ -28,6 +28,18 @@ inline void spawn(std::coroutine_handle<> coro) {
   dcpl::threadpool::get()->push_work([coro]() { coro.resume(); });
 }
 
+inline auto schedule() {
+  struct awaiter {
+    constexpr bool await_ready() const noexcept { return false; }
+    constexpr void await_resume() const noexcept { }
+    void await_suspend(std::coroutine_handle<> coro) const noexcept {
+      spawn(coro);
+    }
+  };
+
+  return awaiter{};
+}
+
 // Hack to get current coroutine handle. Use as:
 //
 //   auto handle = co_await get_coro_handle();
