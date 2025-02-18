@@ -6,6 +6,8 @@
 #include <span>
 #include <string_view>
 
+#include "dcpl/assert.h"
+
 namespace dcpl {
 
 class mapfile {
@@ -16,7 +18,10 @@ class mapfile {
 
   template <typename T>
   std::span<const T> data() const {
-    return std::span<const T>(reinterpret_cast<const T*>(base_), size_);
+    DCPL_CHECK_EQ(size_ % sizeof(T), 0) << "Mapped memory size not a multiple of "
+                                        << sizeof(T) << "\n";
+
+    return std::span<const T>(reinterpret_cast<const T*>(base_), size_ / sizeof(T));
   }
 
   operator std::string_view() const {
