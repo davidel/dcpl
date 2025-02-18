@@ -44,5 +44,9 @@ std::span<char> to_string(const T& value, std::span<char> buf,
   return { ptr, static_cast<std::size_t>(buf.size() - (ptr - base)) };
 }
 
+bool is_prime(std::size_t n);
+
+std::size_t next_prime(std::size_t n);
+
 }
 
