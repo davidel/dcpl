@@ -10,6 +10,13 @@
 
 namespace dcpl {
 
+template <typename T, typename S>
+std::span<T> reinterpret_span(std::span<S> source) {
+  static_assert(sizeof(T) == sizeof(S), "Mismatching size");
+
+  return std::span<T>{ reinterpret_cast<T*>(source.data()), source.size() };
+}
+
 template <typename T>
 std::span<char> to_string(const T& value, std::span<char> buf,
                           std::enable_if_t<std::is_integral_v<T>, T>* = nullptr) {

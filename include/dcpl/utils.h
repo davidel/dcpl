@@ -139,6 +139,18 @@ std::vector<T> to_vector(const C& data) {
   return std::vector<T>(data.begin(), data.end());
 }
 
+template <typename T, typename C>
+std::vector<T> to_vector_cast(const C& data) {
+  std::vector<T> dest;
+
+  dest.reserve(data.size());
+  for (const auto& value : data) {
+    dest.push_back(static_cast<T>(value));
+  }
+
+  return std::move(dest);
+}
+
 template<typename K, typename V, template<typename, typename, typename...> typename C>
 C<V, K> invert_map(const C<K, V>& imap) {
   C<V, K> omap;
