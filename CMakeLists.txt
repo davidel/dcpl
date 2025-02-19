@@ -41,12 +41,14 @@ target_include_directories(dcpl PUBLIC
   "${PROJECT_SOURCE_DIR}/include"
 )
 
-set_target_properties(dcpl PROPERTIES PUBLIC_HEADER "${DCPL_HEADERS}")
-
 install(TARGETS dcpl
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/dcpl
+)
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
+  DESTINATION "include"
+  FILES_MATCHING
+  PATTERN "*.h"
 )
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
