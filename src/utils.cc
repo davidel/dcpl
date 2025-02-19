@@ -17,6 +17,12 @@ std::string_view read_line(std::string_view* data) {
   return ln;
 }
 
+rnd_generator create_rnd_generator() {
+  std::random_device rd;
+
+  return rnd_generator(rd());
+}
+
 std::span<const char> to_span(const std::string& str) {
   return { str.c_str(), str.size() };
 }

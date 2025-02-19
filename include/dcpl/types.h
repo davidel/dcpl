@@ -7,7 +7,7 @@
 #include <random>
 #include <vector>
 
-// Should not have any local dependency!
+// NOTE: Should not have any local dependency!
 
 namespace dcpl {
 
