@@ -2,14 +2,40 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 // Dependencies must be limited!
 #include "dcpl/assert.h"
 
 namespace dcpl {
+
+namespace {
+
+template <typename T>
+using ref_pair = std::pair<std::reference_wrapper<const typename T::key_type>,
+                           std::reference_wrapper<const typename T::mapped_type>>;
+
+}
+
+template <typename T, typename F>
+std::vector<ref_pair<T>>
+map_sort(const T& data, const F& cmp) {
+  using mpair = ref_pair<T>;
+  std::vector<mpair> sorted;
+
+  sorted.reserve(data.size());
+  for (const auto& it : data) {
+    sorted.push_back(mpair{it.first, it.second});
+  }
+
+  std::sort(sorted.begin(), sorted.end(), cmp);
+
+  return std::move(sorted);
+}
 
 template<typename T, typename C>
 std::vector<T> to_vector(const C& data) {
