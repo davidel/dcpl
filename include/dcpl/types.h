@@ -21,6 +21,8 @@ using uint_t = typename std::make_unsigned<int_t>::type;
 using maxint_t = __int128;
 using umaxint_t = unsigned __int128;
 
+using ssize_t = std::ptrdiff_t;
+
 static constexpr std::size_t MAXINT_NBITS = CHAR_BIT * sizeof(maxint_t);
 
 template <typename T>

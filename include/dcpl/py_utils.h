@@ -87,32 +87,30 @@ void for_each_arg(const P& args, const F& fn) {
 }
 
 struct slicevals {
-  ssize_t start = 0;
-  ssize_t stop = 0;
-  ssize_t step = 0;
-  ssize_t length = 0;
-};
-
-inline slicevals deslice(std::size_t size, const py::slice& slice) {
   py::ssize_t start = 0;
   py::ssize_t stop = 0;
   py::ssize_t step = 0;
   py::ssize_t length = 0;
+};
 
-  DCPL_ASSERT(slice.compute(size, &start, &stop, &step, &length))
+inline slicevals deslice(std::size_t size, const py::slice& py_slice) {
+  slicevals slice;
+
+  DCPL_ASSERT(py_slice.compute(size, &slice.start, &slice.stop,
+                               &slice.step, &slice.length))
       << "Unable to compute slice arguments";
 
-  return { start, stop, step, length };
+  return slice;
 }
 
 template <typename F>
 void for_each_slice(const slicevals& slice, const F& fn) {
   if (slice.step > 0) {
-    for (ssize_t i = slice.start; i < slice.stop; i += slice.step) {
+    for (py::ssize_t i = slice.start; i < slice.stop; i += slice.step) {
       fn(i);
     }
   } else if (slice.step < 0) {
-    for (ssize_t i = slice.start; i > slice.stop; i += slice.step) {
+    for (py::ssize_t i = slice.start; i > slice.stop; i += slice.step) {
       fn(i);
     }
   } else {
