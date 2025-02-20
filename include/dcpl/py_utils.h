@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <climits>
 #include <cstdint>
 #include <optional>
 #include <span>
@@ -149,7 +148,7 @@ T get_value_or(const py::dict& dict, const S& key, const T& defval) {
 inline umaxint_t to_maxint(const py::object& value) {
   umaxint_t result =
       static_cast<umaxint_t>(PyLong_AsUnsignedLongLongMask(value.ptr()));
-  std::size_t ull_nbits = CHAR_BIT * sizeof(unsigned long long);
+  std::size_t ull_nbits = bit_sizeof<unsigned long long>;
 
   for (std::size_t nbits = ull_nbits; nbits < MAXINT_NBITS; nbits += ull_nbits) {
     py::object shift = py::reinterpret_steal<py::object>(PyLong_FromSize_t(nbits));
@@ -165,7 +164,7 @@ inline umaxint_t to_maxint(const py::object& value) {
 inline py::object from_maxint(umaxint_t value) {
   py::object result = py::reinterpret_steal<py::object>(PyLong_FromUnsignedLongLong(
       static_cast<unsigned long long>(value)));
-  std::size_t ull_nbits = CHAR_BIT * sizeof(unsigned long long);
+  std::size_t ull_nbits = bit_sizeof<unsigned long long>;
 
   for (std::size_t nbits = ull_nbits; nbits < MAXINT_NBITS && (value >> nbits) != 0;
        nbits += ull_nbits) {

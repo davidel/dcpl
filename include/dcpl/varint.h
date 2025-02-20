@@ -1,6 +1,5 @@
 #pragma once
 
-#include <climits>
 #include <cstdint>
 #include <numeric>
 #include <optional>
@@ -8,6 +7,9 @@
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>
+
+#include "dcpl/assert.h"
+#include "dcpl/types.h"
 
 namespace dcpl {
 
@@ -42,14 +44,14 @@ std::tuple<T, std::span<const std::uint8_t>> varint_decode(std::span<const std::
   T value = 0;
 
   while (ptr < top && *ptr & 0x80) {
-    DCPL_CHECK_LT(nbits, CHAR_BIT * sizeof(T)) << "Too many bits while decoding varint";
+    DCPL_CHECK_LT(nbits, bit_sizeof<T>()) << "Too many bits while decoding varint";
 
     value |= static_cast<T>(0x7f & *ptr++) << nbits;
     nbits += 7;
   }
   DCPL_ASSERT(ptr < top) << "Buffer overflow while decoding varint: value=" << value
                          << " size=" << data.size();
-  DCPL_CHECK_LT(nbits, CHAR_BIT * sizeof(T)) << "Too many bits while decoding varint";
+  DCPL_CHECK_LT(nbits, bit_sizeof<T>()) << "Too many bits while decoding varint";
 
   value |= static_cast<T>(*ptr++) << nbits;
 

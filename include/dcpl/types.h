@@ -1,5 +1,6 @@
 #pragma once
 
+#include <climits>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
@@ -10,6 +11,11 @@
 // NOTE: Should not have any local dependency!
 
 namespace dcpl {
+
+template <typename T>
+constexpr std::size_t bit_sizeof() {
+  return sizeof(T) * CHAR_BIT;
+}
 
 using bitmap = std::vector<bool>;
 
@@ -23,7 +29,7 @@ using umaxint_t = unsigned __int128;
 
 using ssize_t = std::ptrdiff_t;
 
-static constexpr std::size_t MAXINT_NBITS = CHAR_BIT * sizeof(maxint_t);
+static constexpr std::size_t MAXINT_NBITS = bit_sizeof<maxint_t>();
 
 template <typename T>
 using ilist = std::initializer_list<T>;
