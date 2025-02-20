@@ -303,7 +303,7 @@ std::string to_string(const S& s) {
 }
 
 template <typename T, typename S>
-T from_chars(const S& s, std::enable_if_t<std::is_integral_v<T>, T>* = nullptr) {
+T from_chars(const S& s) {
   T res{};
   auto ccres = std::from_chars(s.data(), s.data() + s.size(), res);
 
@@ -311,19 +311,6 @@ T from_chars(const S& s, std::enable_if_t<std::is_integral_v<T>, T>* = nullptr) 
       << "Unable to convert: value=" << to_string(s);
 
   return res;
-}
-
-// On Mac (at least) the std::from_chars() does not support floating point values
-// at the moment.
-template <typename T, typename S>
-T from_chars(const S& s, std::enable_if_t<std::is_floating_point_v<T>, T>* = nullptr) {
-  std::string buf(s.data(), s.data() + s.size());
-  char* eptr = nullptr;
-  auto value = std::strtold(buf.c_str(), &eptr);
-
-  DCPL_ASSERT(eptr == buf.c_str() + s.size()) << "Unable to convert value: " << buf;
-
-  return static_cast<T>(value);
 }
 
 template <typename T, typename S>
