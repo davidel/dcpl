@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <numeric>
 #include <span>
 #include <type_traits>
 #include <utility>
@@ -35,6 +36,14 @@ map_sort(const T& data, const F& cmp) {
   std::sort(sorted.begin(), sorted.end(), cmp);
 
   return std::move(sorted);
+}
+
+template <typename T, typename C>
+T map_add_values(const C& data) {
+  return std::accumulate(data.begin(), data.end(), static_cast<double>(0),
+                         [](T value, const auto& it) {
+                           return value + it.second;
+                         });
 }
 
 template<typename T, typename C>
