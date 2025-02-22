@@ -6,6 +6,7 @@
 #include <numeric>
 #include <span>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -44,6 +45,18 @@ T map_add_values(const C& data) {
                          [](T value, const auto& it) {
                            return value + it.second;
                          });
+}
+
+template<typename T, typename C>
+std::unordered_map<typename C::value_type, T> unique_count(const C& data) {
+  std::unordered_map<typename C::value_type, T> uniq;
+
+  uniq.reserve(data.size());
+  for (const auto& v : data) {
+    uniq[v] += static_cast<T>(1);
+  }
+
+  return std::move(uniq);
 }
 
 template<typename T, typename C>
