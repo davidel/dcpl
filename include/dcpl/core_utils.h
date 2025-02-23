@@ -2,9 +2,11 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <fstream>
 #include <functional>
 #include <numeric>
 #include <span>
+#include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -120,6 +122,8 @@ std::span<char> to_string(const T& value, std::span<char> buf,
 bool is_prime(std::size_t n);
 
 std::size_t next_prime(std::size_t n);
+
+std::ifstream open(const std::string& path, std::ios_base::openmode mode);
 
 }
 

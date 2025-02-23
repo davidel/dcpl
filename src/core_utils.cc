@@ -1,5 +1,8 @@
 #include "dcpl/core_utils.h"
 
+#include <cerrno>
+#include <exception>
+
 namespace dcpl {
 
 bool is_prime(std::size_t n) {
@@ -25,6 +28,22 @@ std::size_t next_prime(std::size_t n) {
   for (++n; !is_prime(n); ++n) {}
 
   return n;
+}
+
+std::ifstream open(const std::string& path, std::ios_base::openmode mode) {
+  std::ifstream file(path, mode);
+
+  try {
+    file.exceptions(std::ios::failbit | std::ios::badbit);
+  } catch (std::ios_base::failure& exception) {
+    if (errno == 0) {
+      throw;
+    }
+    throw std::system_error{ errno, std::generic_category(),
+      "Opening file \"" + path + "\"" };
+  }
+
+  return std::move(file);
 }
 
 }
