@@ -123,7 +123,7 @@ bool is_prime(std::size_t n);
 
 std::size_t next_prime(std::size_t n);
 
-std::ifstream open(const std::string& path, std::ios_base::openmode mode);
+std::fstream open(const std::string& path, std::ios_base::openmode mode);
 
 }
 

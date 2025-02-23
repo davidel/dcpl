@@ -30,8 +30,8 @@ std::size_t next_prime(std::size_t n) {
   return n;
 }
 
-std::ifstream open(const std::string& path, std::ios_base::openmode mode) {
-  std::ifstream file(path, mode);
+std::fstream open(const std::string& path, std::ios_base::openmode mode) {
+  std::fstream file(path, mode);
 
   try {
     file.exceptions(std::ios::failbit | std::ios::badbit);
