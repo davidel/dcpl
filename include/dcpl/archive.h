@@ -276,12 +276,12 @@ class Archive {
     load_set(data);
   }
 
-  template <typename T, typename S = decltype(std::declval<T>().store(nullptr))>
+  template <typename T, typename S = decltype(&T::store)>
   void store(const T& data) {
     data.store(this);
   }
 
-  template <typename T, typename S = decltype(std::declval<T>().load(nullptr))>
+  template <typename T, typename S = decltype(&T::load)>
   void load(T& data) {
     data.load(this);
   }
