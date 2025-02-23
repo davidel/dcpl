@@ -32,248 +32,258 @@ class Archive {
   }
 
   template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
-  void write(const T& data) {
+  void store(const T& data) {
     file_->write(reinterpret_cast<const char*>(&data), sizeof(data));
   }
 
   template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
-  void read(T& data) {
+  void load(T& data) {
     file_->read(reinterpret_cast<char*>(&data), sizeof(data));
   }
 
   template <typename T>
-  void write_ptr(const T& data) {
+  void store_ptr(const T& data) {
     if (data) {
-      write(static_cast<char>(1));
-      write(*data);
+      store(static_cast<char>(1));
+      store(*data);
     } else {
-      write(static_cast<char>(0));
+      store(static_cast<char>(0));
     }
   }
 
   template <typename T>
-  void write(const std::unique_ptr<T>& data) {
-    write_ptr(data);
+  void store(const std::unique_ptr<T>& data) {
+    store_ptr(data);
   }
 
   template <typename T>
-  void write(const std::shared_ptr<T>& data) {
-    write_ptr(data);
+  void store(const std::shared_ptr<T>& data) {
+    store_ptr(data);
   }
 
   template <typename T, typename C>
-  void read_ptr(T& data, const C& ctor) {
+  void load_ptr(T& data, const C& ctor) {
     char marker;
 
-    read(marker);
+    load(marker);
     if (marker) {
       data = ctor();
-      read(*data);
+      load(*data);
     } else {
       data = nullptr;
     }
   }
 
   template <typename T>
-  void read(std::unique_ptr<T>& data) {
-    read_ptr(data, std::make_unique<T>);
+  void load(std::unique_ptr<T>& data) {
+    load_ptr(data, std::make_unique<T>);
   }
 
   template <typename T>
-  void read(std::shared_ptr<T>& data) {
-    read_ptr(data, std::make_shared<T>);
+  void load(std::shared_ptr<T>& data) {
+    load_ptr(data, std::make_shared<T>);
   }
 
   template <typename T>
-  void write_vector(const T& data) {
-    write(data.size());
+  void store_vector(const T& data) {
+    store(data.size());
     for (const auto& value : data) {
-      write(value);
+      store(value);
     }
   }
 
   template <typename T>
-  void write(const std::vector<T>& data) {
-    write_vector(data);
+  void store(const std::vector<T>& data) {
+    store_vector(data);
   }
 
   template <typename T>
-  void write(const std::deque<T>& data) {
-    write_vector(data);
+  void store(const std::deque<T>& data) {
+    store_vector(data);
   }
 
   template <typename T>
-  void write(const std::queue<T>& data) {
-    write_vector(data);
+  void store(const std::queue<T>& data) {
+    store_vector(data);
   }
 
-  void write(const std::string& data) {
-    write_vector(data);
+  void store(const std::string& data) {
+    store_vector(data);
   }
 
-  void write(std::string_view data) {
-    write_vector(data);
+  void store(std::string_view data) {
+    store_vector(data);
   }
 
   template <typename T>
-  void write(std::span<T> data) {
-    write_vector(data);
+  void store(std::span<T> data) {
+    store_vector(data);
   }
 
   template <typename T, std::size_t N>
-  void write(const std::array<T, N>& data) {
+  void store(const std::array<T, N>& data) {
     for (const auto& value : data) {
-      write(value);
+      store(value);
     }
   }
 
   template <typename T>
-  void read_vector(T& data) {
+  void load_vector(T& data) {
     decltype(data.size()) size;
 
-    read(size);
+    load(size);
     data.resize(size);
     for (decltype(size) i = 0; i < size; ++i) {
-      read(data[i]);
+      load(data[i]);
     }
   }
 
   template <typename T>
-  void read_span(T& data) {
+  void load_span(T& data) {
     DCPL_CHECK_NE(ator_, nullptr) << "unable to deserialize spans without an allocator";
 
     decltype(data.size()) size;
 
-    read(size);
+    load(size);
 
     typename T::value_type* ptr = reinterpret_cast<typename T::value_type*>(
         ator_->allocate(size * sizeof(typename T::value_type)));
 
     for (decltype(size) i = 0; i < size; ++i) {
-      read(ptr[i]);
+      load(ptr[i]);
     }
 
     data = T{ ptr, size };
   }
 
   template <typename T>
-  void read(std::vector<T>& data) {
-    read_vector(data);
+  void load(std::vector<T>& data) {
+    load_vector(data);
   }
 
   template <typename T>
-  void read(std::deque<T>& data) {
-    read_vector(data);
+  void load(std::deque<T>& data) {
+    load_vector(data);
   }
 
   template <typename T>
-  void read(std::queue<T>& data) {
-    read_vector(data);
+  void load(std::queue<T>& data) {
+    load_vector(data);
   }
 
-  void read(std::string& data) {
-    read_vector(data);
+  void load(std::string& data) {
+    load_vector(data);
   }
 
-  void read(std::string_view& data) {
-    read_span(data);
+  void load(std::string_view& data) {
+    load_span(data);
   }
 
   template <typename T>
-  void read(std::span<T>& data) {
-    read_span(data);
+  void load(std::span<T>& data) {
+    load_span(data);
   }
 
   template <typename T, std::size_t N>
-  void read(std::array<T, N>& data) {
+  void load(std::array<T, N>& data) {
     for (auto& value : data) {
-      read(value);
+      load(value);
     }
   }
 
   template <typename T>
-  void write_map(const T& data) {
-    write(data.size());
+  void store_map(const T& data) {
+    store(data.size());
     for (const auto& it : data) {
-      write(it.first);
-      write(it.second);
+      store(it.first);
+      store(it.second);
     }
   }
 
   template <typename... T>
-  void write(const std::map<T...>& data) {
-    write_map(data);
+  void store(const std::map<T...>& data) {
+    store_map(data);
   }
 
   template <typename... T>
-  void write(const std::unordered_map<T...>& data) {
-    write_map(data);
+  void store(const std::unordered_map<T...>& data) {
+    store_map(data);
   }
 
   template <typename T>
-  void read_map(T& data) {
+  void load_map(T& data) {
     decltype(data.size()) size;
 
-    read(size);
+    load(size);
     for (decltype(size) i = 0; i < size; ++i) {
       typename T::key_type key;
       typename T::mapped_type value;
 
-      read(key);
-      read(value);
+      load(key);
+      load(value);
       data.emplace(std::move(key), std::move(value));
     }
   }
 
   template <typename... T>
-  void read(std::map<T...>& data) {
-    read_map(data);
+  void load(std::map<T...>& data) {
+    load_map(data);
   }
 
   template <typename... T>
-  void read(std::unordered_map<T...>& data) {
-    read_map(data);
+  void load(std::unordered_map<T...>& data) {
+    load_map(data);
   }
 
   template <typename T>
-  void write_set(const T& data) {
-    write(data.size());
+  void store_set(const T& data) {
+    store(data.size());
     for (const auto& value : data) {
-      write(value);
+      store(value);
     }
   }
 
   template <typename... T>
-  void write(const std::set<T...>& data) {
-    write_set(data);
+  void store(const std::set<T...>& data) {
+    store_set(data);
   }
 
   template <typename... T>
-  void write(const std::unordered_set<T...>& data) {
-    write_set(data);
+  void store(const std::unordered_set<T...>& data) {
+    store_set(data);
   }
 
   template <typename T>
-  void read_set(T& data) {
+  void load_set(T& data) {
     decltype(data.size()) size;
 
-    read(size);
+    load(size);
     for (decltype(size) i = 0; i < size; ++i) {
       typename T::value_type value;
 
-      read(value);
+      load(value);
       data.emplace(std::move(value));
     }
   }
 
   template <typename... T>
-  void read(std::set<T...>& data) {
-    read_set(data);
+  void load(std::set<T...>& data) {
+    load_set(data);
   }
 
   template <typename... T>
-  void read(std::unordered_set<T...>& data) {
-    read_set(data);
+  void load(std::unordered_set<T...>& data) {
+    load_set(data);
+  }
+
+  template <typename T, typename S = decltype(std::declval<T>().store(nullptr))>
+  void store(const T& data) {
+    data.store(this);
+  }
+
+  template <typename T, typename S = decltype(std::declval<T>().load(nullptr))>
+  void load(T& data) {
+    data.load(this);
   }
 
  private:
