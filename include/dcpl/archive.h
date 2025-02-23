@@ -1,10 +1,13 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include <deque>
 #include <fstream>
 #include <map>
 #include <memory>
 #include <memory_resource>
+#include <queue>
 #include <set>
 #include <span>
 #include <string>
@@ -82,7 +85,7 @@ class Archive {
   }
 
   template <typename T>
-  void write_array(const T& data) {
+  void write_vector(const T& data) {
     write(data.size());
     for (const auto& value : data) {
       write(value);
@@ -91,24 +94,41 @@ class Archive {
 
   template <typename T>
   void write(const std::vector<T>& data) {
-    write_array(data);
+    write_vector(data);
+  }
+
+  template <typename T>
+  void write(const std::deque<T>& data) {
+    write_vector(data);
+  }
+
+  template <typename T>
+  void write(const std::queue<T>& data) {
+    write_vector(data);
   }
 
   void write(const std::string& data) {
-    write_array(data);
+    write_vector(data);
   }
 
   void write(std::string_view data) {
-    write_array(data);
+    write_vector(data);
   }
 
   template <typename T>
   void write(std::span<T> data) {
-    write_array(data);
+    write_vector(data);
+  }
+
+  template <typename T, std::size_t N>
+  void write(const std::array<T, N>& data) {
+    for (const auto& value : data) {
+      write(value);
+    }
   }
 
   template <typename T>
-  void read_array(T& data) {
+  void read_vector(T& data) {
     decltype(data.size()) size;
 
     read(size);
@@ -138,11 +158,21 @@ class Archive {
 
   template <typename T>
   void read(std::vector<T>& data) {
-    read_array(data);
+    read_vector(data);
+  }
+
+  template <typename T>
+  void read(std::deque<T>& data) {
+    read_vector(data);
+  }
+
+  template <typename T>
+  void read(std::queue<T>& data) {
+    read_vector(data);
   }
 
   void read(std::string& data) {
-    read_array(data);
+    read_vector(data);
   }
 
   void read(std::string_view& data) {
@@ -152,6 +182,13 @@ class Archive {
   template <typename T>
   void read(std::span<T>& data) {
     read_span(data);
+  }
+
+  template <typename T, std::size_t N>
+  void read(std::array<T, N>& data) {
+    for (auto& value : data) {
+      read(value);
+    }
   }
 
   template <typename T>
