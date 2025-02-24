@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <fstream>
 #include <functional>
+#include <ios>
 #include <numeric>
 #include <span>
 #include <string>
@@ -124,6 +125,19 @@ bool is_prime(std::size_t n);
 std::size_t next_prime(std::size_t n);
 
 std::fstream open(const std::string& path, std::ios_base::openmode mode);
+
+template <typename T>
+std::streampos stream_size(T* stream) {
+  std::streampos pos = stream->tellg();
+
+  stream->seekg(0, std::ios::end);
+
+  std::streampos size = stream->tellg();
+
+  stream->seekg(pos, std::ios::beg);
+
+  return size;
+}
 
 }
 

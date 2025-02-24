@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <deque>
 #include <fstream>
+#include <list>
 #include <map>
 #include <memory>
 #include <memory_resource>
@@ -98,6 +99,11 @@ class archive {
   }
 
   template <typename T>
+  void store(const std::list<T>& data) {
+    store_vector(data);
+  }
+
+  template <typename T>
   void store(const std::deque<T>& data) {
     store_vector(data);
   }
@@ -158,6 +164,11 @@ class archive {
 
   template <typename T>
   void load(std::vector<T>& data) {
+    load_vector(data);
+  }
+
+  template <typename T>
+  void load(std::list<T>& data) {
     load_vector(data);
   }
 
