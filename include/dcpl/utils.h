@@ -17,6 +17,7 @@
 
 #include "dcpl/assert.h"
 #include "dcpl/constants.h"
+#include "dcpl/core_utils.h"
 #include "dcpl/hash.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/types.h"
@@ -283,18 +284,14 @@ std::vector<T> sequence_comp(const E& ins, const F& fn) {
 template <typename B>
 std::vector<B> load_file(const char* path, bool binary) {
   std::ios::openmode mode = binary ? std::ios::binary : std::ios::openmode{};
-  std::ifstream in_file(path, /*mode=*/ std::ios::in | mode);
-
-  in_file.seekg(0, std::ios::end);
-
-  auto fsize = in_file.tellg();
-
+  std::fstream file = open(path, std::ios::in | mode);
+  std::streampos fsize = stream_size(&file);
   std::vector<B> fdata(fsize, 0);
 
-  in_file.seekg(0);
-  in_file.read(fdata.data(), fsize);
+  file.seekg(0);
+  file.read(fdata.data(), fsize);
 
-  return fdata;
+  return std::move(fdata);
 }
 
 template <typename S>
