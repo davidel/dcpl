@@ -54,12 +54,12 @@ class args {
     }
 
     template <typename T>
-    const T* get(const std::string& name) const {
+    const T& get(const std::string& name) const {
       const T* value = find<T>(name);
 
       DCPL_CHECK_NE(value, nullptr) << "Unable to find flag: " << name;
 
-      return value;
+      return *value;
     }
 
     const std::vector<std::string>& unargs() const {
