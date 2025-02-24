@@ -22,11 +22,11 @@
 
 namespace dcpl {
 
-class Archive {
+class archive {
  public:
   using allocator = std::pmr::unsynchronized_pool_resource;
 
-  explicit Archive(std::fstream* file, allocator* ator = nullptr) :
+  explicit archive(std::fstream* file, allocator* ator = nullptr) :
       file_(file),
       ator_(ator) {
   }
