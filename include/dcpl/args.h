@@ -18,10 +18,10 @@ class args {
  public:
   using bool_t = bool;
   using boolv_t = std::vector<bool>;
-  using int_t = dcpl::maxint_t;
-  using intv_t = std::vector<dcpl::maxint_t>;
-  using uint_t = dcpl::umaxint_t;
-  using uintv_t = std::vector<dcpl::umaxint_t>;
+  using int_t = dcpl::int_t;
+  using intv_t = std::vector<dcpl::int_t>;
+  using uint_t = dcpl::uint_t;
+  using uintv_t = std::vector<dcpl::uint_t>;
   using float_t = float;
   using floatv_t = std::vector<float>;
   using double_t = double;
@@ -108,6 +108,8 @@ class args {
   };
 
   std::map<std::string_view, const flag*> collect_args() const;
+
+  void show_help(const char* prog_name) const;
 
   static std::any parse_range(char** argv, int pos, int count, const flag& fvalue);
 
