@@ -73,6 +73,8 @@ ostream& operator<<(ostream& os, const tuple<Args...>& tp) {
   return os << ")";
 }
 
+#if defined(__GLIBCXX_TYPE_INT_N_0)
+
 inline ostream& operator<<(ostream& os, __int128 v) {
   char buf[80];
   std::span<char> sbuf = dcpl::to_string(v, buf);
@@ -90,6 +92,8 @@ inline ostream& operator<<(ostream& os, unsigned __int128 v) {
 
   return os;
 }
+
+#endif // defined(__GLIBCXX_TYPE_INT_N_0)
 
 template <typename T>
 struct hash<span<T>> {
