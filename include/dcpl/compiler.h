@@ -1,23 +1,33 @@
 #pragma once
 
+#include <string>
+
 #if defined(__GNUC__) || defined(__clang__)
 
 #include <cxxabi.h>
 
+#include <cstdlib>
+
 namespace dcpl {
 
-template<typename T>
-std::string type_name() {
-  std::string tname = typeid(T).name();
+static inline std::string demangle(const char* name) {
+  std::string tname;
   int status = -1;
-  char *demangled_name = abi::__cxa_demangle(tname.c_str(), NULL, NULL, &status);
+  char *demangled_name = abi::__cxa_demangle(name, NULL, NULL, &status);
 
   if (status == 0) {
     tname = demangled_name;
     std::free(demangled_name);
+  } else {
+    tname = name;
   }
 
   return tname;
+}
+
+template<typename T>
+std::string type_name() {
+  return demangle(typeid(T).name());
 }
 
 }
@@ -28,6 +38,10 @@ std::string type_name() {
 #else
 
 namespace dcpl {
+
+static inline std::string demangle(const char* name) {
+  return name;
+}
 
 template<typename T>
 std::string type_name() {
