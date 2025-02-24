@@ -37,7 +37,7 @@ args::parsed args::parse(int argc, char** argv) const {
         std::string bname = name.substr(3);
         auto ait = all_args.find(bname);
 
-        if (ait != all_args.end() && ait->second->type == dcpl::type_name<bool_t>()) {
+        if (ait != all_args.end() && ait->second->type == type_spec<bool_t>()) {
           args.emplace(std::move(bname), false);
           continue;
         }
@@ -89,16 +89,55 @@ std::map<std::string_view, const args::flag*> args::collect_args() const {
 }
 
 void args::show_help(const char* prog_name) const {
-  for (auto& fvalue : g_global_flags) {
+  std::cerr << "Usage: " << prog_name << "\n\n";
 
+  auto show_arg = [](const auto& fvalue) {
+    const char* argn = fvalue.type.starts_with("vector<") ? "ARG..." : "ARG";
+
+    std::cerr << "  --" << fvalue.name << "\t" << argn << "\t\t"
+              << fvalue.help << " (" << fvalue.type << ")";
+
+    if (fvalue.defval.has_value()) {
+      if (fvalue.type == type_spec<bool_t>()) {
+        std::cerr << "  [default = " << std::any_cast<bool_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<boolv_t>()) {
+        std::cerr << "  [default = " << std::any_cast<boolv_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<int_t>()) {
+        std::cerr << "  [default = " << std::any_cast<int_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<intv_t>()) {
+        std::cerr << "  [default = " << std::any_cast<intv_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<uint_t>()) {
+        std::cerr << "  [default = " << std::any_cast<uint_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<uintv_t>()) {
+        std::cerr << "  [default = " << std::any_cast<uintv_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<float_t>()) {
+        std::cerr << "  [default = " << std::any_cast<float_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<floatv_t>()) {
+        std::cerr << "  [default = " << std::any_cast<floatv_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<double_t>()) {
+        std::cerr << "  [default = " << std::any_cast<double_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<doublev_t>()) {
+        std::cerr << "  [default = " << std::any_cast<doublev_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<string_t>()) {
+        std::cerr << "  [default = " << std::any_cast<string_t>(fvalue.defval) << "]";
+      } else if (fvalue.type == type_spec<stringv_t>()) {
+        std::cerr << "  [default = " << std::any_cast<stringv_t>(fvalue.defval) << "]";
+      }
+    }
+
+    std::cerr << "\n";
+  };
+
+  for (const auto& fvalue : g_global_flags) {
+    show_arg(fvalue);
   }
-  for (auto& fvalue : flags_) {
-
+  for (const auto& fvalue : flags_) {
+    show_arg(fvalue);
   }
 }
 
 std::any args::parse_range(char** argv, int pos, int count, const flag& fvalue) {
-  if (fvalue.type == dcpl::type_name<bool_t>()) {
+  if (fvalue.type == type_spec<bool_t>()) {
     if (count == 0) {
       return true;
     }
@@ -114,7 +153,7 @@ std::any args::parse_range(char** argv, int pos, int count, const flag& fvalue) 
     } else {
       DCPL_THROW() << "Invalid value for " << fvalue.name << " flag : " << argv[pos];
     }
-  } else if (fvalue.type == dcpl::type_name<boolv_t>()) {
+  } else if (fvalue.type == type_spec<boolv_t>()) {
     boolv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
@@ -132,68 +171,68 @@ std::any args::parse_range(char** argv, int pos, int count, const flag& fvalue) 
     }
     return std::any(std::move(values));
 
-  } else if (fvalue.type == dcpl::type_name<int_t>()) {
+  } else if (fvalue.type == type_spec<int_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return dcpl::from_chars<int_t>(std::string_view(argv[pos]));
-  } else if (fvalue.type == dcpl::type_name<intv_t>()) {
+    return from_chars<int_t>(std::string_view(argv[pos]));
+  } else if (fvalue.type == type_spec<intv_t>()) {
     intv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(dcpl::from_chars<int_t>(std::string_view(argv[i])));
+      values.push_back(from_chars<int_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
-  } else if (fvalue.type == dcpl::type_name<uint_t>()) {
+  } else if (fvalue.type == type_spec<uint_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return dcpl::from_chars<uint_t>(std::string_view(argv[pos]));
-  } else if (fvalue.type == dcpl::type_name<uintv_t>()) {
+    return from_chars<uint_t>(std::string_view(argv[pos]));
+  } else if (fvalue.type == type_spec<uintv_t>()) {
     uintv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(dcpl::from_chars<uint_t>(std::string_view(argv[i])));
+      values.push_back(from_chars<uint_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
-  } else if (fvalue.type == dcpl::type_name<float_t>()) {
+  } else if (fvalue.type == type_spec<float_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return dcpl::from_chars<float_t>(std::string_view(argv[pos]));
-  } else if (fvalue.type == dcpl::type_name<floatv_t>()) {
+    return from_chars<float_t>(std::string_view(argv[pos]));
+  } else if (fvalue.type == type_spec<floatv_t>()) {
     floatv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(dcpl::from_chars<float_t>(std::string_view(argv[i])));
+      values.push_back(from_chars<float_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
-  } else if (fvalue.type == dcpl::type_name<double_t>()) {
+  } else if (fvalue.type == type_spec<double_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return dcpl::from_chars<double_t>(std::string_view(argv[pos]));
-  } else if (fvalue.type == dcpl::type_name<doublev_t>()) {
+    return from_chars<double_t>(std::string_view(argv[pos]));
+  } else if (fvalue.type == type_spec<doublev_t>()) {
     doublev_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(dcpl::from_chars<double_t>(std::string_view(argv[i])));
+      values.push_back(from_chars<double_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
-  } else if (fvalue.type == dcpl::type_name<string_t>()) {
+  } else if (fvalue.type == type_spec<string_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
     return std::string(argv[pos]);
-  } else if (fvalue.type == dcpl::type_name<stringv_t>()) {
+  } else if (fvalue.type == type_spec<stringv_t>()) {
     stringv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
