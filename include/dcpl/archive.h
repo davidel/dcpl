@@ -146,7 +146,7 @@ class archive {
 
   template <typename T>
   void load_span(T& data) {
-    DCPL_CHECK_NE(ator_, nullptr) << "unable to deserialize spans without an allocator";
+    DCPL_CHECK_NE(ator_, nullptr) << "Unable to deserialize spans without an allocator";
 
     decltype(data.size()) size;
 
@@ -156,6 +156,7 @@ class archive {
         ator_->allocate(size * sizeof(typename T::value_type)));
 
     for (decltype(size) i = 0; i < size; ++i) {
+      new (ptr + i) typename T::value_type();
       load(ptr[i]);
     }
 
@@ -221,11 +222,22 @@ class archive {
     store_map(data);
   }
 
-  template <typename T>
-  void load_map(T& data) {
+  template <bool RESERVE, typename T>
+  auto load_size(T& data) {
     decltype(data.size()) size;
 
     load(size);
+    if constexpr (RESERVE) {
+      data.reserve(size);
+    }
+
+    return size;
+  }
+
+  template <bool RESERVE, typename T>
+  void load_map(T& data) {
+    auto size = load_size<RESERVE>(data);
+
     for (decltype(size) i = 0; i < size; ++i) {
       typename T::key_type key;
       typename T::mapped_type value;
@@ -238,12 +250,12 @@ class archive {
 
   template <typename... T>
   void load(std::map<T...>& data) {
-    load_map(data);
+    load_map<false>(data);
   }
 
   template <typename... T>
   void load(std::unordered_map<T...>& data) {
-    load_map(data);
+    load_map<true>(data);
   }
 
   template <typename T>
@@ -264,11 +276,10 @@ class archive {
     store_set(data);
   }
 
-  template <typename T>
+  template <bool RESERVE, typename T>
   void load_set(T& data) {
-    decltype(data.size()) size;
+    auto size = load_size<RESERVE>(data);
 
-    load(size);
     for (decltype(size) i = 0; i < size; ++i) {
       typename T::value_type value;
 
@@ -279,12 +290,12 @@ class archive {
 
   template <typename... T>
   void load(std::set<T...>& data) {
-    load_set(data);
+    load_set<false>(data);
   }
 
   template <typename... T>
   void load(std::unordered_set<T...>& data) {
-    load_set(data);
+    load_set<true>(data);
   }
 
   template <typename T, typename S = decltype(&T::store)>
