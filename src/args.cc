@@ -114,10 +114,6 @@ void args::show_help(const char* prog_name) const {
         std::cerr << "  [default = " << std::any_cast<float_t>(fvalue.defval) << "]";
       } else if (fvalue.type == type_spec<floatv_t>()) {
         std::cerr << "  [default = " << std::any_cast<floatv_t>(fvalue.defval) << "]";
-      } else if (fvalue.type == type_spec<double_t>()) {
-        std::cerr << "  [default = " << std::any_cast<double_t>(fvalue.defval) << "]";
-      } else if (fvalue.type == type_spec<doublev_t>()) {
-        std::cerr << "  [default = " << std::any_cast<doublev_t>(fvalue.defval) << "]";
       } else if (fvalue.type == type_spec<string_t>()) {
         std::cerr << "  [default = " << std::any_cast<string_t>(fvalue.defval) << "]";
       } else if (fvalue.type == type_spec<stringv_t>()) {
@@ -211,20 +207,6 @@ std::any args::parse_range(char** argv, int pos, int count, const flag& fvalue) 
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
       values.push_back(from_chars<float_t>(std::string_view(argv[i])));
-    }
-    return std::any(std::move(values));
-  } else if (fvalue.type == type_spec<double_t>()) {
-    DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
-                            << ") for flag: " << fvalue.name;
-
-    return from_chars<double_t>(std::string_view(argv[pos]));
-  } else if (fvalue.type == type_spec<doublev_t>()) {
-    doublev_t values;
-
-    DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
-                            << ") for flag: " << fvalue.name;
-    for (int i = pos; i < pos + count; ++i) {
-      values.push_back(from_chars<double_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
   } else if (fvalue.type == type_spec<string_t>()) {

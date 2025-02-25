@@ -23,10 +23,8 @@ class args {
   using intv_t = std::vector<int_t>;
   using uint_t = uint_t;
   using uintv_t = std::vector<uint_t>;
-  using float_t = float;
-  using floatv_t = std::vector<float>;
-  using double_t = double;
-  using doublev_t = std::vector<double>;
+  using float_t = double;
+  using floatv_t = std::vector<double>;
   using string_t = std::string;
   using stringv_t = std::vector<std::string>;
 
@@ -155,16 +153,6 @@ class args {
   template <>
   std::string type_spec<floatv_t>() {
     return "vector<float>";
-  }
-
-  template <>
-  std::string type_spec<double_t>() {
-    return "double";
-  }
-
-  template <>
-  std::string type_spec<doublev_t>() {
-    return "vector<double>";
   }
 
   template <>
