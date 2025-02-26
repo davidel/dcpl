@@ -44,8 +44,8 @@ map_sort(const T& data, const F& cmp) {
 
 template <typename T, typename C>
 T map_add_values(const C& data) {
-  return std::accumulate(data.begin(), data.end(), static_cast<double>(0),
-                         [](T value, const auto& it) {
+  return std::accumulate(data.begin(), data.end(), static_cast<T>(0),
+                         [](const T& value, const auto& it) {
                            return value + it.second;
                          });
 }
