@@ -151,8 +151,8 @@ class archive {
 
     load(size);
     data.resize(size);
-    for (decltype(size) i = 0; i < size; ++i) {
-      load(data[i]);
+    for (auto& value : data) {
+      load(value);
     }
   }
 
