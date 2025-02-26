@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <functional>
+#include <limits>
 #include <numeric>
 #include <optional>
 #include <random>
@@ -126,7 +127,10 @@ std::size_t choice(const T& probs, G* rgen, bool normalize = false) {
     prob -= fprob;
   }
 
-  DCPL_THROW() << "Likely un-normalized probabilities";
+  DCPL_CHECK_LE(prob, std::numeric_limits<float>::epsilon())
+      << "Likely un-normalized probabilities, left " << prob;
+
+  return probs.size() - 1;
 }
 
 template<typename T>
