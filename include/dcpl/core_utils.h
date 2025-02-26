@@ -62,6 +62,28 @@ std::unordered_map<typename C::value_type, T> unique_count(const C& data) {
   return std::move(uniq);
 }
 
+template<typename T>
+const typename T::mapped_type* get(const T& data, const typename T::key_type& key) {
+  auto it = data.find(key);
+
+  return (it != data.end()) ? &it->second : nullptr;
+}
+
+template<typename T>
+typename T::mapped_type* get(T& data, const typename T::key_type& key) {
+  auto it = data.find(key);
+
+  return (it != data.end()) ? &it->second : nullptr;
+}
+
+template<typename T>
+typename T::mapped_type get_or(const T& data, const typename T::key_type& key,
+                               typename T::mapped_type defval) {
+  auto* value = get(data, key);
+
+  return (value != nullptr) ? *value : std::move(defval);
+}
+
 template<typename T, typename C>
 std::vector<T> to_vector(const C& data) {
   return std::vector<T>(data.begin(), data.end());
