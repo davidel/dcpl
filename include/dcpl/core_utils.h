@@ -52,7 +52,7 @@ T map_add_values(const C& data) {
 
 template <typename T, typename C>
 T sum(const C& data) {
-  return std::accumulate(data.begin(), data.end(), std::plus<T>());
+  return std::accumulate(data.begin(), data.end(), static_cast<T>(0), std::plus<T>());
 }
 
 template<typename T, typename C>
