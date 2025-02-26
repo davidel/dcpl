@@ -7,7 +7,6 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <memory_resource>
 #include <queue>
 #include <set>
 #include <span>
@@ -24,12 +23,25 @@
 namespace dcpl {
 
 class archive {
- public:
-  using allocator = std::pmr::unsynchronized_pool_resource;
+  struct deletable {
+    virtual ~deletable() { }
+  };
 
-  explicit archive(std::fstream* file, allocator* ator = nullptr) :
+  template <typename T>
+  struct span_buffer : public deletable {
+    explicit span_buffer(std::size_t size) :
+        buffer(std::make_unique<T[]>(size)) {
+    }
+
+    std::unique_ptr<T[]> buffer;
+  };
+
+ public:
+  using span_storage = std::vector<std::unique_ptr<deletable>>;
+
+  explicit archive(std::fstream* file, span_storage* span_stg = nullptr) :
       file_(file),
-      ator_(ator) {
+      span_stg_(span_stg) {
   }
 
   template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
@@ -146,21 +158,23 @@ class archive {
 
   template <typename T>
   void load_span(T& data) {
-    DCPL_CHECK_NE(ator_, nullptr) << "Unable to deserialize spans without an allocator";
+    DCPL_CHECK_NE(span_stg_, nullptr)
+        << "Unable to deserialize spans without a span storage";
 
     decltype(data.size()) size;
 
     load(size);
 
-    typename T::value_type* ptr = reinterpret_cast<typename T::value_type*>(
-        ator_->allocate(size * sizeof(typename T::value_type)));
+    using span_type = span_buffer<typename T::value_type>;
+
+    std::unique_ptr<span_type> span = std::make_unique<span_type>(size);
 
     for (decltype(size) i = 0; i < size; ++i) {
-      new (ptr + i) typename T::value_type();
-      load(ptr[i]);
+      load(span->buffer[i]);
     }
+    data = T{ span->buffer.get(), size };
 
-    data = T{ ptr, size };
+    span_stg_->push_back(std::move(span));
   }
 
   template <typename T>
@@ -310,7 +324,7 @@ class archive {
 
  private:
   std::fstream* file_;
-  allocator* ator_ = nullptr;
+  span_storage* span_stg_ = nullptr;
 };
 
 }
