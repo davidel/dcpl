@@ -50,6 +50,11 @@ T map_add_values(const C& data) {
                          });
 }
 
+template <typename T, typename C>
+T sum(const C& data) {
+  return std::accumulate(data.begin(), data.end(), std::plus<T>());
+}
+
 template<typename T, typename C>
 std::unordered_map<typename C::value_type, T> unique_count(const C& data) {
   std::unordered_map<typename C::value_type, T> uniq;

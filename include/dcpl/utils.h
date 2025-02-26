@@ -86,12 +86,12 @@ rnd_generator create_rnd_generator();
 
 template<typename T, typename G>
 std::vector<T> randn(std::size_t count, G* rgen, T mean = 0, T stddev = 1) {
-  std::normal_distribution<T> gen(mean, stddev);
+  std::normal_distribution<T> distrib(mean, stddev);
   std::vector<T> values;
 
   values.reserve(count);
   for (std::size_t i = 0; i < count; ++i) {
-    values.push_back(gen(*rgen));
+    values.push_back(distrib(*rgen));
   }
 
   return values;
@@ -99,15 +99,34 @@ std::vector<T> randn(std::size_t count, G* rgen, T mean = 0, T stddev = 1) {
 
 template<typename T, typename G>
 std::vector<T> rand(std::size_t count, G* rgen, T rmin = 0, T rmax = 1) {
-  std::uniform_real_distribution<T> gen(rmin, rmax);
+  std::uniform_real_distribution<T> distrib(rmin, rmax);
   std::vector<T> values;
 
   values.reserve(count);
   for (std::size_t i = 0; i < count; ++i) {
-    values.push_back(gen(*rgen));
+    values.push_back(distrib(*rgen));
   }
 
   return values;
+}
+
+template<typename T, typename G>
+std::size_t choice(const T& probs, G* rgen, bool normalize = false) {
+  double scaler = normalize ? 1.0 / sum<double>(probs) : 1.0;
+
+  std::uniform_real_distribution<double> distrib(0.0, 1.0);
+  double prob = distrib(*rgen);
+
+  for (std::size_t i = 0; i < probs.size(); ++i) {
+    double fprob = probs[i] * scaler;
+
+    if (prob <= fprob) {
+      return i;
+    }
+    prob -= fprob;
+  }
+
+  DCPL_THROW() << "Likely un-normalized probabilities";
 }
 
 template<typename T>
