@@ -83,10 +83,6 @@ void mapfile::resize(fileoff_t size) {
   DCPL_ASSERT((mode_ & write) != 0)
       << "Cannot resize an mmap opened in read mode: " << path_;
 
-  DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
-      << "Failed to sync mmap memory (" << std::strerror(errno)
-      << ") : " << path_;
-
   DCPL_ASSERT(::mprotect(base_, size_, PROT_NONE) == 0)
       << "Failed to set mmap memory protection (" << std::strerror(errno)
       << ") : " << path_;
