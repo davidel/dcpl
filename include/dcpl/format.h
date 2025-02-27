@@ -17,7 +17,7 @@ class format {
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const format& fmt) {
-    char sbuf[128];
+    char sbuf[64];
     int size = std::snprintf(sbuf, sizeof(sbuf), fmt.fmt_, fmt.value_);
 
     DCPL_CHECK_GE(size, 0) << "Invalid format: " << fmt.fmt_;
