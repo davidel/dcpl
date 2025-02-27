@@ -31,7 +31,7 @@ static inline double exp(double value) {
 static inline double pow(double value, double power) {
   dpack ux = { value };
 
-  ux.x = static_cast<std::int64_t>(power * (ux.i - 4606921278410026770LL) +
+  ux.d = static_cast<std::int64_t>(power * (ux.i - 4606921278410026770LL) +
                                    4606921278410026770LL);
 
   return ux.d;
