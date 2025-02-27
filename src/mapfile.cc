@@ -93,7 +93,7 @@ void mapfile::resize(fileoff_t size) {
       << "Failed to resize mmap file (" << std::strerror(errno)
       << ") : " << path_;
 
-  DCPL_ASSERT(::mprotect(base_, size_, PROT_READ | PROT_WRITE) == 0)
+  DCPL_ASSERT(::mprotect(base_, size, PROT_READ | PROT_WRITE) == 0)
       << "Failed to set mmap memory protection (" << std::strerror(errno)
       << ") : " << path_;
 
