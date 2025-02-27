@@ -43,7 +43,7 @@ mapfile::mapfile(std::string path, open_mode mode) :
 
   page_size_ = mmconf.page_size;
 
-  fd_ = ::open(path_.c_str(), file_mode);
+  fd_ = ::open(path_.c_str(), file_mode, 0600);
   DCPL_ASSERT(fd_ != -1) << "Unable to open file (" << std::strerror(errno)
                          << "): " << path_;
 
