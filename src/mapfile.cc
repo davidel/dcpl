@@ -1,6 +1,8 @@
 #include "dcpl/mapfile.h"
 
 #include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -54,7 +56,9 @@ mapfile::mapfile(std::string path, open_mode mode) :
   DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file (" << std::strerror(errno)
                                    << "): " << path_;
 
-  cleanups.push([&, this]() { ::munmap(base_, mmconf.max_mmap_size); });
+  mapped_size_ = mmconf.max_mmap_size;
+
+  cleanups.push([this]() { ::munmap(base_, mapped_size_); });
 
   int prot = (mode_ & write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
 
@@ -67,11 +71,35 @@ mapfile::mapfile(std::string path, open_mode mode) :
 
 mapfile::~mapfile() {
   if (base_ != MAP_FAILED) {
-    ::munmap(base_, size_);
+    ::munmap(base_, mapped_size_);
   }
   if (fd_ != -1) {
     ::close(fd_);
   }
 }
 
+void mapfile::resize(fileoff_t size) {
+  DCPL_ASSERT((mode_ & write) != 0)
+      << "Cannot resize an mmap opened in read mode: " << path_;
+
+  DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
+      << "Failed to sync mmap memory (" << std::strerror(errno)
+      << ") : " << path_;
+
+  DCPL_ASSERT(::mprotect(base_, size_, PROT_NONE) == 0)
+      << "Failed to set mmap memory protection (" << std::strerror(errno)
+      << ") : " << path_;
+
+  DCPL_ASSERT(::ftruncate(fd_, size) == 0)
+      << "Failed to resize mmap file (" << std::strerror(errno)
+      << ") : " << path_;
+
+  size_ = size;
+
+  DCPL_ASSERT(::mprotect(base_, size_, PROT_READ | PROT_WRITE) == 0)
+      << "Failed to set mmap memory protection (" << std::strerror(errno)
+      << ") : " << path_;
 }
+
+}
+

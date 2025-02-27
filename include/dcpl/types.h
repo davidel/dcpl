@@ -43,6 +43,8 @@ using umaxint_t = std::uintmax_t;
 
 using ssize_t = std::ptrdiff_t;
 
+using fileoff_t = int_t;
+
 static constexpr std::size_t MAXINT_NBITS = bit_sizeof<maxint_t>();
 
 template <typename T>

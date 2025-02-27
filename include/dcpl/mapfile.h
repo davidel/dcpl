@@ -1,8 +1,5 @@
 #pragma once
 
-#include <sys/mman.h>
-#include <sys/types.h>
-
 #include <cstdint>
 #include <span>
 #include <string>
@@ -10,6 +7,7 @@
 #include <type_traits>
 
 #include "dcpl/assert.h"
+#include "dcpl/types.h"
 
 namespace dcpl {
 
@@ -42,13 +40,16 @@ class mapfile {
     return { view.data(), view.size() };
   }
 
+  void resize(fileoff_t size);
+
  private:
   std::string path_;
   open_mode mode_ = read;
   std::size_t page_size_ = 0;
+  std::size_t mapped_size_ = 0;
   int fd_ = -1;
-  void* base_ = MAP_FAILED;
-  off_t size_ = 0;
+  void* base_ = nullptr;
+  fileoff_t size_ = 0;
 };
 
 }
