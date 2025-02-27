@@ -52,7 +52,8 @@ mapfile::mapfile(std::string path, open_mode mode) :
   size_ = ::lseek(fd_, 0, SEEK_END);
   ::lseek(fd_, 0, SEEK_SET);
 
-  base_ = ::mmap(nullptr, mmconf.max_mmap_size, PROT_NONE, MAP_SHARED, fd_, 0);
+  base_ = ::mmap(nullptr, mmconf.max_mmap_size, PROT_NONE,
+                 MAP_SHARED | mmconf.flags, fd_, 0);
   DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file (" << std::strerror(errno)
                                    << "): " << path_;
 
