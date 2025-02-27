@@ -1,27 +1,36 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 namespace dcpl {
 
 class cleanup {
  public:
-  explicit cleanup(std::function<void()> fn) :
-      fn_(std::move(fn)) {
+  using clean_fn = std::function<void()>;
+
+  explicit cleanup(clean_fn fn) {
+    cleanups_.push_back(std::move(fn));
   }
 
   ~cleanup() {
-    if (fn_ != nullptr) {
-      fn_();
+    for (auto& fn : cleanups_) {
+      fn();
     }
   }
 
+  std::size_t push(clean_fn fn) {
+    cleanups_.push_back(std::move(fn));
+
+    return cleanups_.size() - 1;
+  }
+
   void reset() {
-    fn_ = nullptr;
+    cleanups_.clear();
   }
 
  private:
-  std::function<void()> fn_;
+  std::vector<clean_fn> cleanups_;
 };
 
 }
