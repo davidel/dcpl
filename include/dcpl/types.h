@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>
+#include <ios>
 #include <type_traits>
 #include <random>
 #include <vector>
@@ -43,7 +44,7 @@ using umaxint_t = std::uintmax_t;
 
 using ssize_t = std::ptrdiff_t;
 
-using fileoff_t = int_t;
+using fileoff_t = std::streamoff;
 
 static constexpr std::size_t MAXINT_NBITS = bit_sizeof<maxint_t>();
 
