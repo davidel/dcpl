@@ -36,6 +36,8 @@ class file {
 
   void load(void* data, std::size_t size);
 
+  std::size_t load_some(void* data, std::size_t size);
+
   void sync();
 
  private:

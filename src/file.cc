@@ -79,6 +79,15 @@ void file::load(void* data, std::size_t size) {
       << "Failed to read file (" << std::strerror(errno) << ") : " << path_;
 }
 
+std::size_t file::load_some(void* data, std::size_t size) {
+  dcpl::ssize_t count = ::read(fd_, data, size);
+
+  DCPL_CHECK_GE(count, 0)
+      << "Failed to read file (" << std::strerror(errno) << ") : " << path_;
+
+  return count;
+}
+
 void file::sync() {
   DCPL_ASSERT((mode_ & write) != 0)
       << "Cannot sync an mmap opened in read mode: " << path_;
