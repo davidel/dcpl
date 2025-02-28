@@ -35,7 +35,7 @@ std::string type_name() {
 #define DCPL_LIKELY(cond) __builtin_expect(!!(cond), true)
 #define DCPL_UNLIKELY(cond) __builtin_expect(!!(cond), false)
 
-#else
+#else // defined(__GNUC__) || defined(__clang__)
 
 namespace dcpl {
 
@@ -53,5 +53,8 @@ std::string type_name() {
 #define DCPL_LIKELY(cond) (cond)
 #define DCPL_UNLIKELY(cond) (cond)
 
-#endif
+#endif // defined(__GNUC__) || defined(__clang__)
+
+#define DCPL_BEGIN_PACKED _Pragma("pack(push, 1)")
+#define DCPL_END_PACKED _Pragma("pack(pop)")
 
