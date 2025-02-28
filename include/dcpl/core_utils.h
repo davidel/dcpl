@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <functional>
 #include <ios>
@@ -164,6 +165,24 @@ std::streampos stream_size(T* stream) {
   stream->seekg(pos, std::ios::beg);
 
   return size;
+}
+
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+T mem_read(const void* ptr, std::size_t size) {
+  DCPL_CHECK_GE(size, sizeof(T)) << "Read out of bounds";
+
+  T value{};
+
+  std::memcpy(&value, ptr, sizeof(value));
+
+  return value;
+}
+
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+void mem_write(const T& value, void* ptr, std::size_t size) {
+  DCPL_CHECK_GE(size, sizeof(T)) << "Write out of bounds";
+
+  std::memcpy(ptr, &value, sizeof(value));
 }
 
 }
