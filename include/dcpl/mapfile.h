@@ -22,7 +22,9 @@ class mapfile {
 
   mapfile(std::string path, open_mode mode);
 
-  virtual ~mapfile();
+  mapfile(const mapfile& other) = delete;
+
+  ~mapfile();
 
   template <typename T>
   std::span<T> data() const {
