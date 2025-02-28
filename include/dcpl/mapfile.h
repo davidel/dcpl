@@ -42,6 +42,8 @@ class mapfile {
 
   void resize(fileoff_t size);
 
+  void sync();
+
  private:
   std::string path_;
   open_mode mode_ = read;

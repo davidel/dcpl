@@ -100,5 +100,16 @@ void mapfile::resize(fileoff_t size) {
   size_ = size;
 }
 
+void mapfile::sync() {
+  DCPL_ASSERT((mode_ & write) != 0)
+      << "Cannot sync an mmap opened in read mode: " << path_;
+
+  DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
+      << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
+
+  DCPL_ASSERT(::fdatasync(fd_) == 0)
+      << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
+}
+
 }
 
