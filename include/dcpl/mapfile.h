@@ -26,6 +26,10 @@ class mapfile {
 
   ~mapfile();
 
+  const std::string& path() const {
+    return path_;
+  }
+
   template <typename T>
   std::span<T> data() const {
     DCPL_CHECK_EQ(size_ % sizeof(T), 0)
