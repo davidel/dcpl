@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <deque>
-#include <fstream>
+#include <istream>
 #include <list>
 #include <map>
 #include <memory>
@@ -39,19 +39,19 @@ class archive {
  public:
   using span_storage = std::vector<std::unique_ptr<deletable>>;
 
-  explicit archive(std::fstream* file, span_storage* span_stg = nullptr) :
-      file_(file),
+  explicit archive(std::iostream* stream, span_storage* span_stg = nullptr) :
+      stream_(stream),
       span_stg_(span_stg) {
   }
 
   template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
   void store(const T& data) {
-    file_->write(reinterpret_cast<const char*>(&data), sizeof(data));
+    stream_->write(reinterpret_cast<const char*>(&data), sizeof(data));
   }
 
   template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
   void load(T& data) {
-    file_->read(reinterpret_cast<char*>(&data), sizeof(data));
+    stream_->read(reinterpret_cast<char*>(&data), sizeof(data));
   }
 
   template <typename T>
@@ -323,7 +323,7 @@ class archive {
   }
 
  private:
-  std::fstream* file_;
+  std::iostream* stream_ = nullptr;
   span_storage* span_stg_ = nullptr;
 };
 
