@@ -312,12 +312,12 @@ class archive {
     load_set<true>(data);
   }
 
-  template <typename T, typename S = decltype(&T::store)>
+  template <typename T, void (T::*S)(archive*) const = &T::store>
   void store(const T& data) {
     data.store(this);
   }
 
-  template <typename T, typename S = decltype(&T::load)>
+  template <typename T, void (T::*S)(archive*) = &T::load>
   void load(T& data) {
     data.load(this);
   }
