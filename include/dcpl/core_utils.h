@@ -168,8 +168,17 @@ std::streampos stream_size(T* stream) {
   return size;
 }
 
-static inline bool eof(std::istream* file) {
-  return file->peek() == std::istream::traits_type::eof();
+template <typename T>
+bool eof(T* stream) {
+  std::streampos pos = stream->tellg();
+
+  stream->seekg(0, std::ios::end);
+
+  std::streampos size = stream->tellg();
+
+  stream->seekg(pos, std::ios::beg);
+
+  return size == pos;
 }
 
 }
