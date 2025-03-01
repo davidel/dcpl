@@ -5,6 +5,7 @@
 #include <cstring>
 #include <fstream>
 #include <functional>
+#include <istream>
 #include <ios>
 #include <numeric>
 #include <span>
@@ -165,6 +166,10 @@ std::streampos stream_size(T* stream) {
   stream->seekg(pos, std::ios::beg);
 
   return size;
+}
+
+static inline bool eof(std::istream* file) {
+  return file->peek() == std::istream::traits_type::eof();
 }
 
 }
