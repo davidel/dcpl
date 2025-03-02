@@ -13,9 +13,12 @@ namespace dcpl {
 template <typename B>
 class memory {
  public:
+  memory(B* data, std::size_t size) :
+      data_(data, size) {
+  }
+
   explicit memory(std::span<B> data) :
       data_(data) {
-    static_assert(sizeof(B) == 1);
   }
 
   void seek(std::size_t offset) {
