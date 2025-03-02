@@ -4,21 +4,28 @@
 #include <cstdint>
 #include <cstring>
 #include <span>
+#include <string_view>
 #include <type_traits>
 
 #include "dcpl/assert.h"
 
 namespace dcpl {
 
-template <typename B>
+template <typename B = const char>
 class memory {
  public:
   memory(B* data, std::size_t size) :
       data_(data, size) {
+    static_assert(sizeof(B) == 1);
   }
 
   explicit memory(std::span<B> data) :
       data_(data) {
+    static_assert(sizeof(B) == 1);
+  }
+
+  explicit memory(std::string_view data) :
+      data_(data.data(), data.size()) {
   }
 
   void seek(std::size_t offset) {
