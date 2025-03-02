@@ -14,6 +14,8 @@ namespace dcpl {
 template <typename B = const char>
 class memory {
  public:
+  using size_type = std::uint64_t;
+
   memory(B* data, std::size_t size) :
       data_(data, size) {
     static_assert(sizeof(B) == 1);
@@ -88,6 +90,20 @@ class memory {
     offset_ += count * sizeof(T);
 
     return { reinterpret_cast<T*>(ptr), count };
+  }
+
+  template <typename K, typename V, typename F,
+            typename std::enable_if_t<std::is_arithmetic_v<K>>* = nullptr,
+            typename std::enable_if_t<std::is_arithmetic_v<V>>* = nullptr>
+  void enumerate_kvpairs(const F& enum_fn) {
+    size_type count = read<size_type>();
+
+    for (size_type i = 0; i < count; ++i) {
+      K key = read<K>();
+      V value = read<V>();
+
+      enum_fn(key, value);
+    }
   }
 
  private:
