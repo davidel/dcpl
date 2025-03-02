@@ -24,10 +24,12 @@ class memory {
     offset_ = offset;
   }
 
-  void skip(std::size_t size) {
+  std::span<B> skip(std::size_t size) {
     DCPL_CHECK_LE(offset_ + size, data_.size()) << "Skip out of bounds";
 
     offset_ += size;
+
+    return data_.subspan(offset_ - size, size);
   }
 
   std::size_t tell() const {
