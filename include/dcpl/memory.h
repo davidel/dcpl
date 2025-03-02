@@ -101,6 +101,13 @@ class memory {
     return { reinterpret_cast<T*>(ptr), count };
   }
 
+  template <typename T>
+  std::span<T> read_sequence() {
+    size_type count = read<size_type>();
+
+    return read<T>(count);
+  }
+
   template <typename K, typename V, typename F,
             typename std::enable_if_t<std::is_arithmetic_v<K>>* = nullptr,
             typename std::enable_if_t<std::is_arithmetic_v<V>>* = nullptr>
