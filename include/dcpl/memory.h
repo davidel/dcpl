@@ -8,6 +8,7 @@
 #include <type_traits>
 
 #include "dcpl/assert.h"
+#include "dcpl/constants.h"
 
 namespace dcpl {
 
@@ -42,6 +43,14 @@ class memory {
     offset_ += size;
 
     return data_.subspan(offset_ - size, size);
+  }
+
+  std::span<B> span(std::size_t size = consts::all) {
+    std::size_t ssize = (size == consts::all) ? data_.size() - offset_ : size;
+
+    DCPL_CHECK_LE(offset_ + ssize, data_.size()) << "Span out of bounds";
+
+    return data_.subspan(offset_, ssize);
   }
 
   std::size_t tell() const {
