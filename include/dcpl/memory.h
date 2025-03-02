@@ -61,8 +61,6 @@ class memory {
 
   template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
   void write(const T& value) {
-    static_assert(!std::is_const_v<B>, "Write not allowed on const memory");
-
     B* ptr = data_.data() + offset_;
     B* top = ptr + data_.size();
 
