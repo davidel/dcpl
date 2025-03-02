@@ -44,12 +44,12 @@ class archive {
       span_stg_(span_stg) {
   }
 
-  template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+  template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   void store(const T& data) {
     stream_->write(reinterpret_cast<const char*>(&data), sizeof(data));
   }
 
-  template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+  template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   void load(T& data) {
     stream_->read(reinterpret_cast<char*>(&data), sizeof(data));
   }

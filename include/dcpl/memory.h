@@ -50,7 +50,7 @@ class memory {
     return data_.size();
   }
 
-  template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+  template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   T read() {
     B* ptr = data_.data() + offset_;
     B* top = ptr + data_.size();
@@ -66,7 +66,7 @@ class memory {
     return value;
   }
 
-  template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+  template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   void write(const T& value) {
     B* ptr = data_.data() + offset_;
     B* top = ptr + data_.size();
