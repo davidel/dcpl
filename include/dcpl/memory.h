@@ -61,32 +61,56 @@ class memory {
     return data_.size();
   }
 
+  void read(void* data, std::size_t size) {
+    DCPL_CHECK_GE(data_.size() - offset_, size) << "Read out of bounds";
+
+    std::memcpy(data, data_.data() + offset_, size);
+    offset_ += size;
+  }
+
   template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   T read() {
-    B* ptr = data_.data() + offset_;
-    B* top = ptr + data_.size();
-
-    DCPL_CHECK_GE(top - ptr, sizeof(T)) << "Read out of bounds";
-
     T value{};
 
-    std::memcpy(&value, ptr, sizeof(value));
-
-    offset_ += sizeof(value);
+    read(&value, sizeof(value));
 
     return value;
   }
 
+  void write(const void* data, std::size_t size) {
+    DCPL_CHECK_GE(data_.size() - offset_, size) << "Write out of bounds";
+
+    std::memcpy(data_.data() + offset_, data, size);
+    offset_ += size;
+  }
+
   template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   void write(const T& value) {
-    B* ptr = data_.data() + offset_;
-    B* top = ptr + data_.size();
+    write(&value, sizeof(value));
+  }
 
-    DCPL_CHECK_GE(top - ptr, sizeof(T)) << "Write out of bounds";
+  template <typename T,
+    typename std::enable_if_t<std::is_arithmetic_v<typename T::key_type>>* = nullptr,
+            typename std::enable_if_t<std::is_arithmetic_v<typename T::mapped_type>>* = nullptr>
+  void write(const T& value) {
+    size_type size = value.size();
 
-    std::memcpy(ptr, &value, sizeof(value));
+    write(size);
+    for (const auto& it : value) {
+      write(it.first);
+      write(it.second);
+    }
+  }
 
-    offset_ += sizeof(value);
+  template <typename T,
+    typename std::enable_if_t<std::is_arithmetic_v<typename T::value_type>>* = nullptr>
+  void write(const T& value) {
+    size_type size = value.size();
+
+    write(size);
+    for (const auto& item : value) {
+      write(item);
+    }
   }
 
   template <typename T>
