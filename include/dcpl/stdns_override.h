@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <ostream>
 #include <span>
@@ -53,6 +54,8 @@ void stream_tuple(std::ostream& os, const T& tp, std::index_sequence<Is...>) {
 }
 
 namespace std {
+
+namespace fs = std::filesystem;
 
 template <typename T>
 ostream& operator<<(ostream& os, const span<T>& spn) {
