@@ -23,6 +23,33 @@ rnd_generator create_rnd_generator() {
   return rnd_generator(rd());
 }
 
+void rnd_generator_ensure::ensure(rnd_generator* ptr) {
+  if (ptr != nullptr) {
+    ptr_ = ptr;
+  } else {
+    std::random_device rd;
+
+    uptr_ = std::make_unique<rnd_generator>(rd());
+    ptr_ = uptr_.get();
+  }
+}
+
+std::string rand_string(std::size_t size, rnd_generator* rgen) {
+  static const std::string_view chars{
+    "0123456789abcdefghijklmnopqrstuvwxyz"
+  };
+
+  rnd_generator_ensure ergen(rgen);
+  std::uniform_int_distribution<int> distrib(0, chars.size() - 1);
+  std::string result(size, 0);
+
+  for (auto& cref : result) {
+    cref = chars[distrib(*rgen)];
+  }
+
+  return std::move(result);
+}
+
 std::span<const char> to_span(const std::string& str) {
   return { str.c_str(), str.size() };
 }

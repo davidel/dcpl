@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <climits>
 #include <charconv>
+#include <cstddef>
 #include <cstdlib>
 #include <fstream>
 #include <functional>
@@ -12,6 +13,7 @@
 #include <random>
 #include <span>
 #include <sstream>
+#include <string>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -84,6 +86,29 @@ std::vector<T> arange(T base, T end, T step = 1) {
 }
 
 rnd_generator create_rnd_generator();
+
+class rnd_generator_ensure {
+ public:
+  rnd_generator_ensure() {
+    ensure(nullptr);
+  }
+
+  explicit rnd_generator_ensure(rnd_generator* ptr) {
+    ensure(ptr);
+  }
+
+  rnd_generator& get() const {
+    return *ptr_;
+  }
+
+ private:
+  void ensure(rnd_generator* ptr);
+
+  rnd_generator* ptr_ = nullptr;
+  std::unique_ptr<rnd_generator> uptr_;
+};
+
+std::string rand_string(std::size_t size, rnd_generator* rgen = nullptr);
 
 template<typename T, typename G>
 std::vector<T> randn(std::size_t count, G* rgen, T mean = 0, T stddev = 1) {
