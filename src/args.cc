@@ -171,42 +171,42 @@ std::any args::parse_range(char** argv, int pos, int count, const flag& fvalue) 
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return from_chars<int_t>(std::string_view(argv[pos]));
+    return to_number<int_t>(std::string_view(argv[pos]));
   } else if (fvalue.type == args_detail::type_spec<intv_t>()) {
     intv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(from_chars<int_t>(std::string_view(argv[i])));
+      values.push_back(to_number<int_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
   } else if (fvalue.type == args_detail::type_spec<uint_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return from_chars<uint_t>(std::string_view(argv[pos]));
+    return to_number<uint_t>(std::string_view(argv[pos]));
   } else if (fvalue.type == args_detail::type_spec<uintv_t>()) {
     uintv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(from_chars<uint_t>(std::string_view(argv[i])));
+      values.push_back(to_number<uint_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
   } else if (fvalue.type == args_detail::type_spec<float_t>()) {
     DCPL_CHECK_EQ(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
 
-    return from_chars<float_t>(std::string_view(argv[pos]));
+    return to_number<float_t>(std::string_view(argv[pos]));
   } else if (fvalue.type == args_detail::type_spec<floatv_t>()) {
     floatv_t values;
 
     DCPL_CHECK_GE(count, 1) << "Wrong number of arguments (" << count
                             << ") for flag: " << fvalue.name;
     for (int i = pos; i < pos + count; ++i) {
-      values.push_back(from_chars<float_t>(std::string_view(argv[i])));
+      values.push_back(to_number<float_t>(std::string_view(argv[i])));
     }
     return std::any(std::move(values));
   } else if (fvalue.type == args_detail::type_spec<string_t>()) {
