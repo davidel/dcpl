@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cctype>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -106,6 +107,27 @@ std::vector<T> to_vector_cast(const C& data) {
   }
 
   return std::move(dest);
+}
+
+template <typename T, typename F>
+std::string to_helper(const T& data, const F& tfn) {
+  std::string result(data.size(), 0);
+
+  for (std::size_t i = 0; i < data.size(); ++i) {
+    result[i] = static_cast<char>(tfn(static_cast<unsigned char>(data[i])));
+  }
+
+  return std::move(result);
+}
+
+template <typename T>
+std::string to_upper(const T& data) {
+  return to_helper(data, [](auto c) { return std::toupper(c); });
+}
+
+template <typename T>
+std::string to_lower(const T& data) {
+  return to_helper(data, [](auto c) { return std::tolower(c); });
 }
 
 template <typename T, typename S>

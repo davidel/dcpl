@@ -69,7 +69,8 @@ args::parsed args::parse(int argc, char** argv) const {
       if (fvalue->defval.has_value()) {
         args.emplace(std::string(fvalue->name), fvalue->defval);
       } else {
-        std::cerr << "Missing required flag: " << it.first << "\n\n";
+        std::cerr << "Missing required flag: --" << it.first << " "
+                  << to_upper(it.first) << "\n\n";
 
         show_help(argv[0]);
         std::exit(1);
@@ -97,7 +98,8 @@ void args::show_help(const char* prog_name) const {
   std::cerr << "Usage: " << prog_name << "\n\n";
 
   auto show_arg = [](const auto& fvalue) {
-    const char* argn = fvalue.type.starts_with("vector<") ? "ARG..." : "ARG";
+    std::string argn = fvalue.type.starts_with("vector<") ?
+        to_upper(fvalue.name) + "..." : to_upper(fvalue.name);
 
     std::cerr << "  --" << fvalue.name << "\t" << argn << "\t\t"
               << fvalue.help << " (" << fvalue.type << ")";
