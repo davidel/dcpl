@@ -25,6 +25,24 @@ void remove(const std::string& path) {
   }
 }
 
+void create_directory(const std::string& path) {
+  std::error_code error;
+
+  if (!stdfs::create_directory(path, error)) {
+    throw stdfs::filesystem_error(_S() << "Unable to create folder: " << path,
+                                  error);
+  }
+}
+
+void create_directories(const std::string& path) {
+  std::error_code error;
+
+  if (!stdfs::create_directories(path, error)) {
+    throw stdfs::filesystem_error(_S() << "Unable to create folders: " << path,
+                                  error);
+  }
+}
+
 }
 
 std::string temp_path(const std::string& path) {

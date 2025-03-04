@@ -11,6 +11,10 @@ namespace fs {
 
 void remove(const std::string& path);
 
+void create_directory(const std::string& path);
+
+void create_directories(const std::string& path);
+
 }
 
 std::string temp_path(const std::string& path);
