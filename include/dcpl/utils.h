@@ -93,15 +93,6 @@ class rnd_generator_ensure {
   using generator_type = T;
 
   explicit rnd_generator_ensure(generator_type* ptr) {
-    ensure(ptr);
-  }
-
-  generator_type& get() const {
-    return *ptr_;
-  }
-
- private:
-  void ensure(generator_type* ptr) {
     if (ptr != nullptr) {
       ptr_ = ptr;
     } else {
@@ -112,6 +103,11 @@ class rnd_generator_ensure {
     }
   }
 
+  generator_type& get() const {
+    return *ptr_;
+  }
+
+ private:
   generator_type* ptr_ = nullptr;
   std::unique_ptr<generator_type> uptr_;
 };
