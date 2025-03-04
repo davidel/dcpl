@@ -1,5 +1,7 @@
 #include "dcpl/fs.h"
 
+#include <system_error>
+
 #include "dcpl/core_utils.h"
 #include "dcpl/string_formatter.h"
 #include "dcpl/utils.h"
@@ -8,7 +10,12 @@ namespace dcpl {
 namespace fs {
 
 void remove(const std::string& path) {
-  DCPL_ASSERT(stdfs::remove(path)) << "Unable to remove file: " << path;
+  std::error_code error;
+
+  if (!stdfs::remove(path, error)) {
+    throw stdfs::filesystem_error(_S() << "Unable to remove file: " << path,
+                                  error);
+  }
 }
 
 }
