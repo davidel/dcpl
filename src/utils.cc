@@ -33,7 +33,7 @@ std::string rand_string(std::size_t size, rnd_generator* rgen) {
   std::string result(size, 0);
 
   for (auto& cref : result) {
-    cref = chars[distrib(*rgen)];
+    cref = chars[distrib(ergen.get())];
   }
 
   return std::move(result);
