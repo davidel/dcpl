@@ -3,10 +3,17 @@
 #include <system_error>
 
 #include "dcpl/core_utils.h"
+#include "dcpl/env.h"
 #include "dcpl/string_formatter.h"
 #include "dcpl/utils.h"
 
 namespace dcpl {
+namespace {
+
+static const std::size_t temp_size = getenv<std::size_t>("DCPL_TEMP_SIZE", 12);
+
+}
+
 namespace fs {
 
 void remove(const std::string& path) {
@@ -21,11 +28,11 @@ void remove(const std::string& path) {
 }
 
 std::string temp_path(const std::string& path) {
-  return _S() << path << "." << rand_string(12);
+  return _S() << path << "." << rand_string(temp_size);
 }
 
 std::string temp_path() {
-  return stdfs::temp_directory_path() / rand_string(12);
+  return stdfs::temp_directory_path() / rand_string(temp_size);
 }
 
 atomic_write::atomic_write(std::string path, std::ios::openmode mode) :
