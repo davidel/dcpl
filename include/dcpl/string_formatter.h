@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -20,6 +21,10 @@ public:
   }
 
   operator std::string() const {
+    return str();
+  }
+
+  operator std::filesystem::path() const {
     return str();
   }
 
