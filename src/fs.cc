@@ -43,6 +43,15 @@ void create_directories(const std::string& path) {
   }
 }
 
+void remove_all(const std::string& path) {
+  std::error_code error;
+
+  if (stdfs::remove_all(path, error) == static_cast<std::uintmax_t>(-1)) {
+    throw stdfs::filesystem_error(_S() << "Unable to recursively remove files: "
+                                  << path, error);
+  }
+}
+
 }
 
 std::string temp_path(const std::string& path) {
