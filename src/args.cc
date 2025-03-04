@@ -68,6 +68,11 @@ args::parsed args::parse(int argc, char** argv) const {
 
       if (fvalue->defval.has_value()) {
         args.emplace(std::string(fvalue->name), fvalue->defval);
+      } else {
+        std::cerr << "Missing required flag: " << it.first << "\n\n";
+
+        show_help(argv[0]);
+        std::exit(1);
       }
     }
   }
