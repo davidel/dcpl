@@ -153,7 +153,7 @@ bool is_prime(std::size_t n);
 
 std::size_t next_prime(std::size_t n);
 
-std::fstream open(const std::string& path, std::ios_base::openmode mode);
+std::fstream open(const std::string& path, std::ios::openmode mode);
 
 template <typename T>
 std::streampos stream_size(T* stream) {
