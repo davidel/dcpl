@@ -87,25 +87,33 @@ std::vector<T> arange(T base, T end, T step = 1) {
 
 rnd_generator create_rnd_generator();
 
+template <typename T>
 class rnd_generator_ensure {
  public:
-  rnd_generator_ensure() {
-    ensure(nullptr);
-  }
+  using generator_type = T;
 
-  explicit rnd_generator_ensure(rnd_generator* ptr) {
+  explicit rnd_generator_ensure(generator_type* ptr) {
     ensure(ptr);
   }
 
-  rnd_generator& get() const {
+  generator_type& get() const {
     return *ptr_;
   }
 
  private:
-  void ensure(rnd_generator* ptr);
+  void ensure(generator_type* ptr) {
+    if (ptr != nullptr) {
+      ptr_ = ptr;
+    } else {
+      std::random_device rd;
 
-  rnd_generator* ptr_ = nullptr;
-  std::unique_ptr<rnd_generator> uptr_;
+      uptr_ = std::make_unique<generator_type>(rd());
+      ptr_ = uptr_.get();
+    }
+  }
+
+  generator_type* ptr_ = nullptr;
+  std::unique_ptr<generator_type> uptr_;
 };
 
 std::string rand_string(std::size_t size, rnd_generator* rgen = nullptr);

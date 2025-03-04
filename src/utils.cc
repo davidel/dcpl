@@ -23,17 +23,6 @@ rnd_generator create_rnd_generator() {
   return rnd_generator(rd());
 }
 
-void rnd_generator_ensure::ensure(rnd_generator* ptr) {
-  if (ptr != nullptr) {
-    ptr_ = ptr;
-  } else {
-    std::random_device rd;
-
-    uptr_ = std::make_unique<rnd_generator>(rd());
-    ptr_ = uptr_.get();
-  }
-}
-
 std::string rand_string(std::size_t size, rnd_generator* rgen) {
   static const std::string_view chars{
     "0123456789abcdefghijklmnopqrstuvwxyz"
