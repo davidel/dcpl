@@ -9,6 +9,7 @@
 
 #include "dcpl/assert.h"
 #include "dcpl/constants.h"
+#include "dcpl/core_utils.h"
 
 namespace dcpl {
 
@@ -35,6 +36,10 @@ class memory {
     DCPL_CHECK_LE(offset, data_.size()) << "Seek out of bounds";
 
     offset_ = offset;
+  }
+
+  void align(std::size_t size) {
+    seek(round_up(offset_, size));
   }
 
   std::span<B> skip(std::size_t size) {

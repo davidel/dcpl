@@ -175,6 +175,13 @@ bool is_prime(std::size_t n);
 
 std::size_t next_prime(std::size_t n);
 
+template <typename T, typename S>
+T round_up(T value, S step) {
+  T tstep = static_cast<T>(step);
+
+  return ((value + tstep - 1) / tstep) * tstep;
+}
+
 std::fstream open(const std::string& path, std::ios::openmode mode);
 
 template <typename T>

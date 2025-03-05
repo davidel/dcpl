@@ -12,6 +12,7 @@
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
 #include "dcpl/ivector.h"
+#include "dcpl/memory.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
@@ -461,6 +462,20 @@ TEST(Coro, SelfPromise) {
   auto cfn = CoroSelfPromise();
 
   EXPECT_EQ(cfn.value(), static_cast<void*>(&cfn.promise()));
+}
+
+TEST(Memory, API) {
+  static constexpr std::size_t buffer_size = 4096;
+  std::unique_ptr<std::uint8_t[]> buffer =
+      std::make_unique<std::uint8_t[]>(buffer_size);
+  dcpl::memory mem(buffer.get(), buffer_size);
+
+  mem.write(17);
+  mem.seek(0);
+  EXPECT_EQ(mem.read<int>(), 17);
+
+  mem.align(16);
+  EXPECT_EQ(mem.tell(), 16);
 }
 
 }
