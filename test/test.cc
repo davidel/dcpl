@@ -12,6 +12,7 @@
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
 #include "dcpl/ivector.h"
+#include "dcpl/json/json.h"
 #include "dcpl/memory.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
@@ -476,6 +477,26 @@ TEST(Memory, API) {
 
   mem.align(16);
   EXPECT_EQ(mem.tell(), 16);
+}
+
+TEST(JSON, API) {
+  dcpl::json::json jd;
+
+  jd["int17"] = 17;
+  EXPECT_EQ(jd["int17"], 17);
+
+  jd["int21"] = 21;
+  EXPECT_EQ(jd["int21"], 21);
+
+  jd["str_ABC"] = "ABC";
+  EXPECT_EQ(jd["str_ABC"], "ABC");
+
+  std::string jd_dump = jd.dump();
+  dcpl::json::json pjd = dcpl::json::json::parse(jd_dump);
+
+  EXPECT_EQ(pjd["int17"], 17);
+  EXPECT_EQ(pjd["int21"], 21);
+  EXPECT_EQ(pjd["str_ABC"], "ABC");
 }
 
 }
