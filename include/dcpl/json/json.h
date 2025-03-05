@@ -11,7 +11,7 @@
 // To update:
 //
 //  wget -O json_lib.h https://raw.githubusercontent.com/nlohmann/json/refs/heads/develop/single_include/nlohmann/json.hpp
-#include "json_lib.h"
+#include "dcpl/json/json_lib.h"
 
 #endif // __has_include(<nlohmann/json.hpp>)
 
