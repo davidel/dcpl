@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
 #include <climits>
 #include <charconv>
 #include <cstddef>
@@ -370,6 +371,19 @@ T to_number(const S& s) {
 std::span<const char> to_span(const std::string& str);
 
 std::span<const char> to_span(const char* str);
+
+template <typename T = std::int64_t>
+T nstime() {
+  std::chrono::time_point<std::chrono::high_resolution_clock>
+      now = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<T, std::nano> epoch = now.time_since_epoch();
+
+  return epoch.count();
+}
+
+inline double time() {
+  return nstime<double>() * 1e-9;
+}
 
 }
 
