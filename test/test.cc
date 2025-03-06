@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <random>
 #include <sstream>
@@ -514,6 +515,10 @@ TEST(Any, API) {
 
   am["string"] = std::string("ABCD");
   EXPECT_EQ(am["string"], std::string("ABCD"));
+  EXPECT_EQ(*am["string"].ptr_cast<const std::string>(), std::string("ABCD"));
+
+  am["cstring"] = "ABCD";
+  EXPECT_EQ(std::strcmp(am["cstring"], "ABCD"), 0);
 }
 
 }

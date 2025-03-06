@@ -2,6 +2,7 @@
 
 #include <any>
 #include <map>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
@@ -52,6 +53,11 @@ struct any {
   template <typename U>
   U cast() const {
     return std::any_cast<U>(v);
+  }
+
+  template <typename U>
+  U* ptr_cast() const {
+    return std::any_cast<std::remove_pointer_t<U>>(&v);
   }
 
   std::any v;
