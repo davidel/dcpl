@@ -9,6 +9,7 @@
 
 #include "gtest/gtest.h"
 
+#include "dcpl/any.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
 #include "dcpl/ivector.h"
@@ -497,6 +498,22 @@ TEST(JSON, API) {
   EXPECT_EQ(pjd["int17"], 17);
   EXPECT_EQ(pjd["int21"], 21);
   EXPECT_EQ(pjd["str_ABC"], "ABC");
+}
+
+TEST(Any, API) {
+  dcpl::any_map<std::string> am;
+
+  am["int17"] = 17;
+  EXPECT_EQ(am["int17"], 17);
+
+  am["float21"] = 21.0f;
+  EXPECT_EQ(am["float21"], 21.0f);
+
+  am["double_pi"] = 3.14;
+  EXPECT_EQ(am["double_pi"], 3.14);
+
+  am["string"] = std::string("ABCD");
+  EXPECT_EQ(am["string"], std::string("ABCD"));
 }
 
 }
