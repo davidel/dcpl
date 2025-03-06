@@ -8,20 +8,28 @@
 
 namespace dcpl {
 
-struct any {
+class any {
+ public:
   any() = default;
 
   template <typename T>
-  any(T cv) : v(std::move(cv)) { }
+  any(T cv) : value_(std::move(cv)) { }
+
+  template <typename T>
+  any& operator=(T cv) {
+    value_ = std::move(cv);
+
+    return *this;
+  }
 
   template <typename U>
   operator U() const {
-    return std::any_cast<U>(v);
+    return std::any_cast<U>(value_);
   }
 
   // Spaceships do not seem to be working here ...
   template <typename U>
-  bool operator==(const U& rhs) const {
+  auto operator==(const U& rhs) const {
     return cast<U>() == rhs;
   }
 
@@ -52,15 +60,20 @@ struct any {
 
   template <typename U>
   U cast() const {
-    return std::any_cast<U>(v);
+    return std::any_cast<U>(value_);
   }
 
   template <typename U>
   U* ptr_cast() const {
-    return std::any_cast<std::remove_pointer_t<U>>(&v);
+    return std::any_cast<std::remove_pointer_t<U>>(&value_);
   }
 
-  std::any v;
+  bool has_value() const {
+    return value_.has_value();
+  }
+
+ private:
+  std::any value_;
 };
 
 template <typename K, typename... ARGS>

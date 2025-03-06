@@ -519,6 +519,11 @@ TEST(Any, API) {
 
   am["cstring"] = "ABCD";
   EXPECT_EQ(std::strcmp(am["cstring"], "ABCD"), 0);
+
+  dcpl::any x = 17.21;
+  EXPECT_EQ(x, 17.21);
+  x = 17;
+  EXPECT_EQ(x, 17);
 }
 
 }
