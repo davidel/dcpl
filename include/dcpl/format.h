@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "dcpl/assert.h"
 
@@ -37,6 +38,8 @@ class format {
   const char* fmt_ = nullptr;
   T value_;
 };
+
+std::string format_duration(double elapsed);
 
 }
 
