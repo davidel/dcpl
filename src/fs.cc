@@ -55,11 +55,13 @@ void remove_all(const std::string& path) {
 }
 
 std::string temp_path(const std::string& path) {
-  return _S() << path << "." << rand_string(temp_size);
+  return _S() << path << "." << rand_string(temp_size) << ".tmp";
 }
 
 std::string temp_path() {
-  return stdfs::temp_directory_path() / rand_string(temp_size);
+  std::string fname = _S() << rand_string(temp_size) << ".tmp";
+
+  return stdfs::temp_directory_path() / fname;
 }
 
 }
