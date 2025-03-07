@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <cstdint>
+#include <cstddef>
 #include <cstring>
 #include <initializer_list>
 #include <ios>
@@ -10,6 +11,30 @@
 #include <vector>
 
 // NOTE: Should not have any local dependency!
+
+#if __has_include(<flat_map>)
+
+#include <flat_map>
+
+namespace dcpl {
+
+template <typename... ARGS>
+using flat_map = std::flat_map<ARGS...>;
+
+}
+
+#elif __has_include("boost/container/flat_map.hpp") // __has_include(<flat_map>)
+
+#include "boost/container/flat_map.hpp"
+
+namespace dcpl {
+
+template <typename... ARGS>
+using flat_map = boost::container::flat_map<ARGS...>;
+
+}
+
+#endif
 
 namespace dcpl {
 
