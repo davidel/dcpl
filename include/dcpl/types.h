@@ -12,29 +12,40 @@
 
 // NOTE: Should not have any local dependency!
 
+// Maps "flat stuff" to the proper implementation. Since c++23 is required
+// for the standard ones, allow fallback to boost in case we are on c++20
+// or below.
 #if __has_include(<flat_map>)
 
 #include <flat_map>
+#include <flat_set>
 
 namespace dcpl {
 
 template <typename... ARGS>
 using flat_map = std::flat_map<ARGS...>;
 
+template <typename... ARGS>
+using flat_set = std::flat_set<ARGS...>;
+
 }
 
 #elif __has_include("boost/container/flat_map.hpp") // __has_include(<flat_map>)
 
 #include "boost/container/flat_map.hpp"
+#include "boost/container/flat_set.hpp"
 
 namespace dcpl {
 
 template <typename... ARGS>
 using flat_map = boost::container::flat_map<ARGS...>;
 
+template <typename... ARGS>
+using flat_set = boost::container::flat_set<ARGS...>;
+
 }
 
-#endif
+#endif // __has_include(<flat_map>)
 
 namespace dcpl {
 
