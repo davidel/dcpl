@@ -75,9 +75,9 @@ class memory {
 
   template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   T read() {
-    T value{};
+    T value = *reinterpret_cast<const T*>(data_.data() + offset_);
 
-    read(&value, sizeof(value));
+    offset_ += sizeof(T);
 
     return value;
   }
@@ -91,7 +91,8 @@ class memory {
 
   template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
   void write(const T& value) {
-    write(&value, sizeof(value));
+    *reinterpret_cast<T*>(data_.data() + offset_) = value;
+    offset_ += sizeof(T);
   }
 
   template <typename T,
