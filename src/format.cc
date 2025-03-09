@@ -61,7 +61,7 @@ std::string format_bytes(umaxint_t size) {
   } else if (dbl_size >= one_kb) {
     ss << format("%.2f KB", dbl_size / one_kb);
   } else {
-    ss << format("%.2f B", dbl_size);
+    ss << format("%.0f B", dbl_size);
   }
 
   return ss.str();
