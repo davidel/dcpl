@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -49,6 +50,8 @@ class mapfile {
   void resize(fileoff_t size);
 
   void sync();
+
+  static std::size_t page_size();
 
  private:
   std::string path_;

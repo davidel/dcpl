@@ -22,7 +22,7 @@ struct mm_pages_conf {
 
 mm_pages_conf get_mm_config() {
   // Do more things with hugetlb pages here ...
-  return { 0, static_cast<std::size_t>(::getpagesize()), 1ULL << 42 };
+  return { 0, mapfile::page_size(), 1ULL << 42 };
 }
 
 }
@@ -109,6 +109,10 @@ void mapfile::sync() {
 
   DCPL_ASSERT(::fdatasync(fd_) == 0)
       << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
+}
+
+std::size_t mapfile::page_size() {
+  return static_cast<std::size_t>(::getpagesize());
 }
 
 }
