@@ -182,6 +182,21 @@ T round_up(T value, S step) {
   return ((value + tstep - 1) / tstep) * tstep;
 }
 
+template <typename T>
+constexpr T qpow(T base, int n) {
+  if (n == 0) {
+    return 1;
+  }
+
+  T result = base;
+
+  for (--n; n > 0; --n) {
+    result *= base;
+  }
+
+  return result;
+}
+
 std::fstream open(const std::string& path, std::ios::openmode mode);
 
 template <typename T>

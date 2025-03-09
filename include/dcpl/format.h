@@ -6,6 +6,7 @@
 #include <string>
 
 #include "dcpl/assert.h"
+#include "dcpl/types.h"
 
 namespace dcpl {
 
@@ -40,6 +41,8 @@ class format {
 };
 
 std::string format_duration(double elapsed);
+
+std::string format_bytes(umaxint_t size);
 
 }
 
