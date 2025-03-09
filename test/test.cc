@@ -508,6 +508,10 @@ TEST(JSON, API) {
   jd["str_ABC"] = "ABC";
   EXPECT_EQ(jd["str_ABC"], "ABC");
 
+  EXPECT_NE(dcpl::get_or<int>(jd, "int21", 111), 111);
+  EXPECT_EQ(dcpl::get_or<int>(jd, "miss", 1721), 1721);
+  EXPECT_EQ(dcpl::get_or<double>(jd, "missd", 17.21), 17.21);
+
   std::string jd_dump = jd.dump();
   dcpl::json::json pjd = dcpl::json::json::parse(jd_dump);
 

@@ -19,5 +19,12 @@ namespace dcpl {
 
 namespace json = nlohmann;
 
+template <typename T, typename K>
+T get_or(const json::json& data, const K& key, T defval) {
+  auto it = data.find(key);
+
+  return it != data.end() ? static_cast<T>(*it) : std::move(defval);
+}
+
 }
 
