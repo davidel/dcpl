@@ -473,12 +473,27 @@ TEST(Memory, API) {
       std::make_unique<std::uint8_t[]>(buffer_size);
   dcpl::memory mem(buffer.get(), buffer_size);
 
-  mem.write(17);
+  mem.write(static_cast<char>(21));
   mem.seek(0);
+  EXPECT_EQ(mem.read<char>(), 21);
+
+  mem.seek(1);
+  mem.write(17);
+  mem.seek(1);
   EXPECT_EQ(mem.read<int>(), 17);
 
-  mem.align(16);
-  EXPECT_EQ(mem.tell(), 16);
+  mem.seek(1);
+  mem.write(17.21f);
+  mem.seek(1);
+  EXPECT_EQ(mem.read<float>(), 17.21f);
+
+  mem.seek(1);
+  mem.write(17.21);
+  mem.seek(1);
+  EXPECT_EQ(mem.read<double>(), 17.21);
+
+  mem.align(128);
+  EXPECT_EQ(mem.tell(), 128);
 }
 
 TEST(JSON, API) {
