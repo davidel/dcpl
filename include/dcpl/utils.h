@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "dcpl/assert.h"
+#include "dcpl/atomic_write.h"
 #include "dcpl/constants.h"
 #include "dcpl/core_utils.h"
 #include "dcpl/hash.h"
@@ -335,7 +336,7 @@ std::vector<T> sequence_comp(const E& ins, const F& fn) {
 }
 
 template <typename B>
-std::vector<B> load_file(const char* path, bool binary) {
+std::vector<B> load_file(const char* path, bool binary = true) {
   std::ios::openmode mode = binary ? std::ios::binary : std::ios::openmode{};
   std::fstream file = open(path, std::ios::in | mode);
   std::streampos fsize = stream_size(&file);
@@ -345,6 +346,16 @@ std::vector<B> load_file(const char* path, bool binary) {
   file.read(fdata.data(), fsize);
 
   return std::move(fdata);
+}
+
+template <typename T>
+void store_file(const char* path, const T& data, bool binary = true) {
+  std::ios::openmode mode = binary ? std::ios::binary : std::ios::openmode{};
+  atomic_write awfile(path, mode);
+
+  awfile.file().write(reinterpret_cast<const char*>(data.data()),
+                      data.size() * sizeof(data[0]));
+  awfile.commit();
 }
 
 template <typename S>
