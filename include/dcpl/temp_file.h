@@ -21,6 +21,10 @@ class temp_file {
     return file_;
   }
 
+  void close() {
+    file_.close();
+  }
+
   void release() {
     released_ = true;
   }
