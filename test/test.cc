@@ -13,12 +13,14 @@
 #include "dcpl/any.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
+#include "dcpl/fs.h"
 #include "dcpl/ivector.h"
 #include "dcpl/json/json.h"
 #include "dcpl/memory.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
+#include "dcpl/temp_file.h"
 #include "dcpl/threadpool.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -543,6 +545,18 @@ TEST(Any, API) {
   EXPECT_EQ(x, 17.21);
   x = 17;
   EXPECT_EQ(x, 17);
+}
+
+TEST(TempFile, API) {
+  std::string path;
+  {
+    dcpl::temp_file tmp({});
+
+    tmp.file() << "Some random data\n";
+    path = tmp.path();
+  }
+
+  EXPECT_FALSE(stdfs::exists(path));
 }
 
 }
