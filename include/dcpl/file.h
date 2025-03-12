@@ -44,6 +44,12 @@ class file {
 
   std::size_t load_some(void* data, std::size_t size);
 
+  void pwrite(const void* data, std::size_t size, fileoff_t off);
+
+  void pread(void* data, std::size_t size, fileoff_t off);
+
+  ssize_t pread_some(void* data, std::size_t size, fileoff_t off);
+
   void sync();
 
  private:

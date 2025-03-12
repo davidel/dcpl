@@ -97,6 +97,24 @@ std::size_t file::load_some(void* data, std::size_t size) {
   return count;
 }
 
+void file::pwrite(const void* data, std::size_t size, fileoff_t off) {
+  ::ssize_t count = ::pwrite(fd_, data, size, off);
+
+  DCPL_CHECK_EQ(size, count)
+      << "Failed to write file (" << std::strerror(errno) << "): " << path_;
+}
+
+void file::pread(void* data, std::size_t size, fileoff_t off) {
+  ::ssize_t count = ::pread(fd_, data, size, off);
+
+  DCPL_CHECK_EQ(size, count)
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+}
+
+ssize_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
+  return ::pread(fd_, data, size, off);
+}
+
 void file::sync() {
   DCPL_ASSERT((mode_ & write) != 0)
       << "Cannot sync an mmap opened in read mode: " << path_;
