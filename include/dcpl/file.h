@@ -13,10 +13,10 @@ class file {
   using open_mode = std::uint32_t;
   using seek_mode = std::uint32_t;
 
-  static constexpr open_mode read = 0;
-  static constexpr open_mode write = 1;
-  static constexpr open_mode create = 1 << 1;
-  static constexpr open_mode trunc = 1 << 2;
+  static constexpr open_mode read = 1;
+  static constexpr open_mode write = 1 << 1;
+  static constexpr open_mode create = 1 << 2;
+  static constexpr open_mode trunc = 1 << 3;
 
   static constexpr seek_mode seek_set = 0;
   static constexpr seek_mode seek_cur = 1;

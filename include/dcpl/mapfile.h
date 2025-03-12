@@ -16,11 +16,11 @@ class mapfile {
  public:
   using open_mode = std::uint32_t;
 
-  static constexpr open_mode read = 0;
-  static constexpr open_mode write = 1;
-  static constexpr open_mode create = 1 << 1;
-  static constexpr open_mode trunc = 1 << 2;
-  static constexpr open_mode priv = 1 << 3;
+  static constexpr open_mode read = 1;
+  static constexpr open_mode write = 1 << 1;
+  static constexpr open_mode create = 1 << 2;
+  static constexpr open_mode trunc = 1 << 3;
+  static constexpr open_mode priv = 1 << 4;
 
   mapfile(std::string path, open_mode mode);
 
