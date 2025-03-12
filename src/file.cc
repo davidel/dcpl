@@ -34,7 +34,16 @@ file::~file() {
   }
 }
 
-fileoff_t file::tell() const {
+fileoff_t file::size() {
+  fileoff_t offset = tell();
+  fileoff_t size = seek(seek_end, 0);
+
+  seek(seek_set, offset);
+
+  return size;
+}
+
+fileoff_t file::tell() {
   return static_cast<fileoff_t>(::lseek(fd_, 0, SEEK_CUR));
 }
 
@@ -60,7 +69,7 @@ fileoff_t file::seek(seek_mode pos, fileoff_t off) {
 
   DCPL_CHECK_GE(offset, 0)
       << "Failed to seek(" << pos << ", " << off
-      << ") (" << std::strerror(errno) << ") : " << path_;
+      << ") (" << std::strerror(errno) << "): " << path_;
 
   return offset;
 }
@@ -69,21 +78,21 @@ void file::store(const void* data, std::size_t size) {
   dcpl::ssize_t count = ::write(fd_, data, size);
 
   DCPL_CHECK_EQ(size, count)
-      << "Failed to write file (" << std::strerror(errno) << ") : " << path_;
+      << "Failed to write file (" << std::strerror(errno) << "): " << path_;
 }
 
 void file::load(void* data, std::size_t size) {
   dcpl::ssize_t count = ::read(fd_, data, size);
 
   DCPL_CHECK_EQ(size, count)
-      << "Failed to read file (" << std::strerror(errno) << ") : " << path_;
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 }
 
 std::size_t file::load_some(void* data, std::size_t size) {
   dcpl::ssize_t count = ::read(fd_, data, size);
 
   DCPL_CHECK_GE(count, 0)
-      << "Failed to read file (" << std::strerror(errno) << ") : " << path_;
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 
   return count;
 }
@@ -93,7 +102,7 @@ void file::sync() {
       << "Cannot sync an mmap opened in read mode: " << path_;
 
   DCPL_ASSERT(::fdatasync(fd_) == 0)
-      << "Failed to sync file (" << std::strerror(errno) << ") : " << path_;
+      << "Failed to sync file (" << std::strerror(errno) << "): " << path_;
 }
 
 }

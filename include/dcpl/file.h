@@ -32,7 +32,9 @@ class file {
     return path_;
   }
 
-  fileoff_t tell() const;
+  fileoff_t size();
+
+  fileoff_t tell();
 
   fileoff_t seek(seek_mode pos, fileoff_t off);
 
