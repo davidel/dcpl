@@ -28,6 +28,10 @@ class file {
 
   ~file();
 
+  const std::string& path() const {
+    return path_;
+  }
+
   fileoff_t tell() const;
 
   fileoff_t seek(seek_mode pos, fileoff_t off);
