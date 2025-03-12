@@ -44,7 +44,7 @@ fileoff_t file::size() {
 }
 
 fileoff_t file::tell() {
-  return static_cast<fileoff_t>(::lseek(fd_, 0, SEEK_CUR));
+  return seek(seek_cur, 0);
 }
 
 fileoff_t file::seek(seek_mode pos, fileoff_t off) {
