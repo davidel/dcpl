@@ -13,9 +13,11 @@
 #include "dcpl/any.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
+#include "dcpl/file.h"
 #include "dcpl/fs.h"
 #include "dcpl/ivector.h"
 #include "dcpl/json/json.h"
+#include "dcpl/mapfile.h"
 #include "dcpl/memory.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
@@ -557,6 +559,59 @@ TEST(TempFile, API) {
   }
 
   EXPECT_FALSE(stdfs::exists(path));
+}
+
+TEST(MapFile, Shared) {
+  static const std::size_t size = 1024 * 1024;
+  dcpl::temp_file tmp({});
+
+  tmp.close();
+
+  {
+    dcpl::mapfile mm(tmp.path(),
+                     dcpl::mapfile::read | dcpl::mapfile::write |
+                     dcpl::mapfile::create);
+
+    mm.resize(size);
+
+    EXPECT_EQ(mm.data<char>().size(), size);
+
+    mm.sync();
+  }
+
+  EXPECT_EQ(stdfs::file_size(tmp.path()), size);
+}
+
+TEST(MapFile, Private) {
+  static const std::size_t size = 1024 * 1024;
+  static const char* const wrdata = "WRITTEN!";
+  dcpl::temp_file tmp({});
+
+  tmp.close();
+
+  {
+    dcpl::mapfile mm(tmp.path(),
+                     dcpl::mapfile::read | dcpl::mapfile::write |
+                     dcpl::mapfile::create | dcpl::mapfile::priv);
+
+    mm.resize(size);
+
+    auto data = mm.data<char>();
+
+    EXPECT_EQ(data.size(), size);
+
+    std::memcpy(data.data() + size / 2, wrdata, std::strlen(wrdata));
+
+    mm.sync();
+  }
+
+  dcpl::file file(tmp.path(), dcpl::file::read);
+  char buffer[32];
+
+  file.pread(buffer, std::strlen(wrdata), size / 2);
+
+  EXPECT_EQ(std::memcmp(buffer, wrdata, std::strlen(wrdata)), 0);
+  EXPECT_EQ(file.size(), size);
 }
 
 }

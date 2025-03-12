@@ -52,8 +52,9 @@ mapfile::mapfile(std::string path, open_mode mode) :
   size_ = ::lseek(fd_, 0, SEEK_END);
   ::lseek(fd_, 0, SEEK_SET);
 
-  base_ = ::mmap(nullptr, mmconf.max_mmap_size, PROT_NONE,
-                 MAP_SHARED | mmconf.flags, fd_, 0);
+  int flags = (mode_ & priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
+
+  base_ = ::mmap(nullptr, mmconf.max_mmap_size, PROT_NONE, flags | mmconf.flags, fd_, 0);
   DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file (" << std::strerror(errno)
                                    << "): " << path_;
 
@@ -101,14 +102,18 @@ void mapfile::resize(fileoff_t size) {
 }
 
 void mapfile::sync() {
-  DCPL_ASSERT((mode_ & write) != 0)
-      << "Cannot sync an mmap opened in read mode: " << path_;
+  if ((mode_ & priv) != 0) {
+    ::write(fd_, base_, size_);
+  } else {
+    DCPL_ASSERT((mode_ & write) != 0)
+        << "Cannot sync an mmap opened in read mode: " << path_;
 
-  DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
-      << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
+    DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
+        << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
 
-  DCPL_ASSERT(::fdatasync(fd_) == 0)
-      << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
+    DCPL_ASSERT(::fdatasync(fd_) == 0)
+        << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
+  }
 }
 
 std::size_t mapfile::page_size() {

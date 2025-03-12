@@ -22,7 +22,10 @@ class temp_file {
   }
 
   void close() {
-    file_.close();
+    if (!closed_) {
+      file_.close();
+      closed_ = true;
+    }
   }
 
   void release() {
@@ -33,6 +36,7 @@ class temp_file {
   std::string path_;
   std::fstream file_;
   bool released_ = false;
+  bool closed_ = false;
 };
 
 }

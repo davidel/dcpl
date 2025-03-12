@@ -20,6 +20,7 @@ class mapfile {
   static constexpr open_mode write = 1;
   static constexpr open_mode create = 1 << 1;
   static constexpr open_mode trunc = 1 << 2;
+  static constexpr open_mode priv = 1 << 3;
 
   mapfile(std::string path, open_mode mode);
 

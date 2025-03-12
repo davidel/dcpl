@@ -12,7 +12,7 @@ temp_file::temp_file(std::ios::openmode mode, std::optional<std::string> path) :
 
 temp_file::~temp_file() {
   if (!released_) {
-    file_.close();
+    close();
     fs::remove(path_);
   }
 }
