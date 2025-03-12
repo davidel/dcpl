@@ -32,10 +32,10 @@ std::string format_duration(double elapsed) {
   if (days > 0) {
     ss << days << "d:";
   }
-  if (hours > 0) {
+  if (hours + days > 0) {
     ss << format("%02uh:", hours);
   }
-  if (mins > 0) {
+  if (mins + hours + days > 0) {
     ss << format("%02um:", mins);
   }
   ss << format("%02us:", secs) << format("%06ju", usecs);
