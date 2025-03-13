@@ -74,21 +74,21 @@ fileoff_t file::seek(seek_mode pos, fileoff_t off) {
   return offset;
 }
 
-void file::store(const void* data, std::size_t size) {
+void file::fwrite(const void* data, std::size_t size) {
   dcpl::ssize_t count = ::write(fd_, data, size);
 
   DCPL_CHECK_EQ(size, count)
       << "Failed to write file (" << std::strerror(errno) << "): " << path_;
 }
 
-void file::load(void* data, std::size_t size) {
+void file::fread(void* data, std::size_t size) {
   dcpl::ssize_t count = ::read(fd_, data, size);
 
   DCPL_CHECK_EQ(size, count)
       << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 }
 
-std::size_t file::load_some(void* data, std::size_t size) {
+std::size_t file::fread_some(void* data, std::size_t size) {
   dcpl::ssize_t count = ::read(fd_, data, size);
 
   DCPL_CHECK_GE(count, 0)

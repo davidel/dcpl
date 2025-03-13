@@ -38,11 +38,11 @@ class file {
 
   fileoff_t seek(seek_mode pos, fileoff_t off);
 
-  void store(const void* data, std::size_t size);
+  void fwrite(const void* data, std::size_t size);
 
-  void load(void* data, std::size_t size);
+  void fread(void* data, std::size_t size);
 
-  std::size_t load_some(void* data, std::size_t size);
+  std::size_t fread_some(void* data, std::size_t size);
 
   void pwrite(const void* data, std::size_t size, fileoff_t off);
 
