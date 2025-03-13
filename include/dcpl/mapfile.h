@@ -16,11 +16,11 @@ class mapfile {
  public:
   using open_mode = std::size_t;
 
-  static constexpr open_mode read = 1;
-  static constexpr open_mode write = 1 << 1;
-  static constexpr open_mode create = 1 << 2;
-  static constexpr open_mode trunc = 1 << 3;
-  static constexpr open_mode priv = 1 << 4;
+  static constexpr open_mode open_read = 1;
+  static constexpr open_mode open_write = 1 << 1;
+  static constexpr open_mode open_create = 1 << 2;
+  static constexpr open_mode open_trunc = 1 << 3;
+  static constexpr open_mode open_priv = 1 << 4;
 
   mapfile(std::string path, open_mode mode);
 
@@ -36,7 +36,7 @@ class mapfile {
   std::span<T> data() const {
     DCPL_CHECK_EQ(size_ % sizeof(T), 0)
         << "Mapped memory size not a multiple of " << sizeof(T);
-    DCPL_ASSERT(std::is_const_v<T> || (mode_ & write) != 0)
+    DCPL_ASSERT(std::is_const_v<T> || (mode_ & open_write) != 0)
         << "Memory map openend in read only mode: " << path_;
 
     return std::span<T>(reinterpret_cast<T*>(base_), size_ / sizeof(T));
@@ -56,7 +56,7 @@ class mapfile {
 
  private:
   std::string path_;
-  open_mode mode_ = read;
+  open_mode mode_ = open_read;
   std::size_t page_size_ = 0;
   std::size_t mapped_size_ = 0;
   int fd_ = -1;

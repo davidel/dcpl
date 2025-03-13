@@ -14,12 +14,12 @@ namespace dcpl {
 file::file(std::string path, open_mode mode, int perms) :
     path_(std::move(path)),
     mode_(mode) {
-  int file_mode = (mode_ & write) != 0 ? O_RDWR : O_RDONLY;
+  int file_mode = (mode_ & open_write) != 0 ? O_RDWR : O_RDONLY;
 
-  if ((mode_ & create) != 0) {
+  if ((mode_ & open_create) != 0) {
     file_mode |= O_CREAT;
   }
-  if ((mode_ & trunc) != 0) {
+  if ((mode_ & open_trunc) != 0) {
     file_mode |= O_TRUNC;
   }
 
@@ -74,21 +74,21 @@ fileoff_t file::seek(seek_mode pos, fileoff_t off) {
   return offset;
 }
 
-void file::fwrite(const void* data, std::size_t size) {
+void file::write(const void* data, std::size_t size) {
   dcpl::ssize_t count = ::write(fd_, data, size);
 
   DCPL_CHECK_EQ(size, count)
       << "Failed to write file (" << std::strerror(errno) << "): " << path_;
 }
 
-void file::fread(void* data, std::size_t size) {
+void file::read(void* data, std::size_t size) {
   dcpl::ssize_t count = ::read(fd_, data, size);
 
   DCPL_CHECK_EQ(size, count)
       << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 }
 
-std::size_t file::fread_some(void* data, std::size_t size) {
+std::size_t file::read_some(void* data, std::size_t size) {
   dcpl::ssize_t count = ::read(fd_, data, size);
 
   DCPL_CHECK_GE(count, 0)
@@ -116,7 +116,7 @@ ssize_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
 }
 
 void file::sync() {
-  DCPL_ASSERT((mode_ & write) != 0)
+  DCPL_ASSERT((mode_ & open_write) != 0)
       << "Cannot sync an mmap opened in read mode: " << path_;
 
   DCPL_ASSERT(::fdatasync(fd_) == 0)

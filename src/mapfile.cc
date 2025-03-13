@@ -30,12 +30,12 @@ mm_pages_conf get_mm_config() {
 mapfile::mapfile(std::string path, open_mode mode) :
     path_(std::move(path)),
     mode_(mode) {
-  int file_mode = (mode_ & write) != 0 ? O_RDWR : O_RDONLY;
+  int file_mode = (mode_ & open_write) != 0 ? O_RDWR : O_RDONLY;
 
-  if ((mode_ & create) != 0) {
+  if ((mode_ & open_create) != 0) {
     file_mode |= O_CREAT;
   }
-  if ((mode_ & trunc) != 0) {
+  if ((mode_ & open_trunc) != 0) {
     file_mode |= O_TRUNC;
   }
 
@@ -52,7 +52,7 @@ mapfile::mapfile(std::string path, open_mode mode) :
   size_ = ::lseek(fd_, 0, SEEK_END);
   ::lseek(fd_, 0, SEEK_SET);
 
-  int flags = (mode_ & priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
+  int flags = (mode_ & open_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
 
   base_ = ::mmap(nullptr, mmconf.max_mmap_size, PROT_NONE, flags | mmconf.flags, fd_, 0);
   DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file (" << std::strerror(errno)
@@ -62,7 +62,7 @@ mapfile::mapfile(std::string path, open_mode mode) :
 
   cleanups.push([this]() { ::munmap(base_, mapped_size_); });
 
-  int prot = (mode_ & write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
+  int prot = (mode_ & open_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
 
   DCPL_ASSERT(::mprotect(base_, size_, prot) == 0)
       << "Failed to set mmap memory protection (" << std::strerror(errno)
@@ -81,7 +81,7 @@ mapfile::~mapfile() {
 }
 
 void mapfile::resize(fileoff_t size) {
-  DCPL_ASSERT((mode_ & write) != 0)
+  DCPL_ASSERT((mode_ & open_write) != 0)
       << "Cannot resize an mmap opened in read mode: " << path_;
 
   DCPL_ASSERT(::mprotect(base_, size_, PROT_NONE) == 0)
@@ -102,10 +102,10 @@ void mapfile::resize(fileoff_t size) {
 }
 
 void mapfile::sync() {
-  DCPL_ASSERT((mode_ & write) != 0)
+  DCPL_ASSERT((mode_ & open_write) != 0)
       << "Cannot sync an mmap opened in read mode: " << path_;
 
-  if ((mode_ & priv) != 0) {
+  if ((mode_ & open_priv) != 0) {
     ::write(fd_, base_, size_);
   } else {
     DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)

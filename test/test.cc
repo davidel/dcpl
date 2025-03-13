@@ -569,8 +569,8 @@ TEST(MapFile, Shared) {
 
   {
     dcpl::mapfile mm(tmp.path(),
-                     dcpl::mapfile::read | dcpl::mapfile::write |
-                     dcpl::mapfile::create);
+                     dcpl::mapfile::open_read | dcpl::mapfile::open_write |
+                     dcpl::mapfile::open_create);
 
     mm.resize(size);
 
@@ -591,8 +591,8 @@ TEST(MapFile, Private) {
 
   {
     dcpl::mapfile mm(tmp.path(),
-                     dcpl::mapfile::read | dcpl::mapfile::write |
-                     dcpl::mapfile::create | dcpl::mapfile::priv);
+                     dcpl::mapfile::open_read | dcpl::mapfile::open_write |
+                     dcpl::mapfile::open_create | dcpl::mapfile::open_priv);
 
     mm.resize(size);
 
@@ -605,7 +605,7 @@ TEST(MapFile, Private) {
     mm.sync();
   }
 
-  dcpl::file file(tmp.path(), dcpl::file::read);
+  dcpl::file file(tmp.path(), dcpl::file::open_read);
   char buffer[32];
 
   file.pread(buffer, std::strlen(wrdata), size / 2);
