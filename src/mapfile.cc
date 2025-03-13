@@ -110,10 +110,10 @@ void mapfile::sync() {
   } else {
     DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
         << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
-
-    DCPL_ASSERT(::fdatasync(fd_) == 0)
-        << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
   }
+
+  DCPL_ASSERT(::fdatasync(fd_) == 0)
+      << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
 }
 
 std::size_t mapfile::page_size() {
