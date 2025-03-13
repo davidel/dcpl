@@ -10,8 +10,8 @@ namespace dcpl {
 
 class file {
  public:
-  using open_mode = std::uint32_t;
-  using seek_mode = std::uint32_t;
+  using open_mode = std::size_t;
+  using seek_mode = std::size_t;
 
   static constexpr open_mode read = 1;
   static constexpr open_mode write = 1 << 1;
