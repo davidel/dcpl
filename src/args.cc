@@ -122,7 +122,7 @@ void args::show_help(const char* prog_name) const {
       } else if (fvalue.type == args_detail::type_spec<floatv_t>()) {
         std::cerr << "  [default = " << std::any_cast<floatv_t>(fvalue.defval) << "]";
       } else if (fvalue.type == args_detail::type_spec<string_t>()) {
-        std::cerr << "  [default = " << std::any_cast<string_t>(fvalue.defval) << "]";
+        std::cerr << "  [default = \"" << std::any_cast<string_t>(fvalue.defval) << "\"]";
       } else if (fvalue.type == args_detail::type_spec<stringv_t>()) {
         std::cerr << "  [default = " << std::any_cast<stringv_t>(fvalue.defval) << "]";
       }
