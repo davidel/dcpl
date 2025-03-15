@@ -138,8 +138,8 @@ std::span<T> reinterpret_span(std::span<S> source) {
 }
 
 template <typename T, typename S>
-T c_cast(S value) {
-  return reinterpret_cast<T>(const_cast<std::remove_cv_t<S>>(value));
+T* c_ptrcast(S* value) {
+  return reinterpret_cast<T*>(const_cast<std::remove_cv_t<S>*>(value));
 }
 
 template <typename T>
