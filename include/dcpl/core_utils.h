@@ -137,6 +137,11 @@ std::span<T> reinterpret_span(std::span<S> source) {
   return std::span<T>{ reinterpret_cast<T*>(source.data()), source.size() };
 }
 
+template <typename T, typename S>
+T c_cast(S value) {
+  return reinterpret_cast<T>(const_cast<std::remove_cv_t<S>>(value));
+}
+
 template <typename T>
 std::span<char> to_string(const T& value, std::span<char> buf,
                           std::enable_if_t<std::is_integral_v<T>, T>* = nullptr) {
