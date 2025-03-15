@@ -137,9 +137,18 @@ std::span<T> reinterpret_span(std::span<S> source) {
   return std::span<T>{ reinterpret_cast<T*>(source.data()), source.size() };
 }
 
-template <typename T, typename S>
-T* c_ptrcast(S* value) {
-  return reinterpret_cast<T*>(const_cast<std::remove_cv_t<S>*>(value));
+template <typename T, typename S,
+          typename std::enable_if_t<std::is_pointer_v<S>>* = nullptr>
+T c_cast(S value) {
+  using NP = std::remove_pointer_t<S>;
+
+  return reinterpret_cast<T>(const_cast<std::remove_cv_t<NP>*>(value));
+}
+
+template <typename T, typename S,
+          typename std::enable_if_t<!std::is_pointer_v<S>>* = nullptr>
+T c_cast(S value) {
+  return reinterpret_cast<T>(value);
 }
 
 template <typename T>
