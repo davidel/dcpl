@@ -107,11 +107,11 @@ void mapfile::sync() {
       << "Cannot sync an mmap opened in read mode: " << path_;
 
   if ((mode_ & open_priv) != 0) {
-    fileoff_t max_write = page_size() * 1024;
+    constexpr std::size_t max_rw_chunk = 1ULL << 30;
     const char* ptr = reinterpret_cast<const char*>(base_);
 
     for (fileoff_t written = 0; written < size_;) {
-      fileoff_t cwrite = std::min<fileoff_t>(size_ - written, max_write);
+      fileoff_t cwrite = std::min<fileoff_t>(size_ - written, max_rw_chunk);
       ::ssize_t count = ::pwrite(fd_, ptr, static_cast<std::size_t>(cwrite), written);
 
       DCPL_ASSERT(count != -1)
