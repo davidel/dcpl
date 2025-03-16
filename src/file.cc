@@ -4,12 +4,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 
 #include "dcpl/assert.h"
 
 namespace dcpl {
+namespace {
+
+constexpr std::size_t max_rw_chunk = 1ULL << 30;
+
+}
 
 file::file(std::string path, open_mode mode, int perms) :
     path_(std::move(path)),
@@ -75,44 +81,111 @@ fileoff_t file::seek(seek_mode pos, fileoff_t off) {
 }
 
 void file::write(const void* data, std::size_t size) {
-  dcpl::ssize_t count = ::write(fd_, data, size);
+  std::size_t tx_size = size;
+  const char* ptr = reinterpret_cast<const char*>(data);
 
-  DCPL_CHECK_EQ(size, count)
-      << "Failed to write file (" << std::strerror(errno) << "): " << path_;
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::write(fd_, ptr, csize);
+
+    DCPL_CHECK_EQ(csize, count)
+        << "Failed to write file (" << std::strerror(errno) << "): " << path_;
+
+    tx_size -= csize;
+    ptr += csize;
+  }
 }
 
 void file::read(void* data, std::size_t size) {
-  dcpl::ssize_t count = ::read(fd_, data, size);
+  std::size_t tx_size = size;
+  char* ptr = reinterpret_cast<char*>(data);
 
-  DCPL_CHECK_EQ(size, count)
-      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::read(fd_, ptr, csize);
+
+    DCPL_CHECK_EQ(csize, count)
+        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+
+    tx_size -= csize;
+    ptr += csize;
+  }
 }
 
 std::size_t file::read_some(void* data, std::size_t size) {
-  dcpl::ssize_t count = ::read(fd_, data, size);
+  std::size_t tx_size = size;
+  char* ptr = reinterpret_cast<char*>(data);
 
-  DCPL_CHECK_GE(count, 0)
-      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::read(fd_, ptr, csize);
 
-  return count;
+    DCPL_CHECK_GE(count, 0)
+        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+
+    tx_size -= count;
+    ptr += count;
+
+    if (count != csize) {
+      break;
+    }
+  }
+
+  return size - tx_size;
 }
 
 void file::pwrite(const void* data, std::size_t size, fileoff_t off) {
-  ::ssize_t count = ::pwrite(fd_, data, size, off);
+  std::size_t tx_size = size;
+  const char* ptr = reinterpret_cast<const char*>(data);
 
-  DCPL_CHECK_EQ(size, count)
-      << "Failed to write file (" << std::strerror(errno) << "): " << path_;
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::pwrite(fd_, ptr, csize, off + size - tx_size);
+
+    DCPL_CHECK_EQ(csize, count)
+        << "Failed to write file (" << std::strerror(errno) << "): " << path_;
+
+    tx_size -= csize;
+    ptr += csize;
+  }
 }
 
 void file::pread(void* data, std::size_t size, fileoff_t off) {
-  ::ssize_t count = ::pread(fd_, data, size, off);
+  std::size_t tx_size = size;
+  char* ptr = reinterpret_cast<char*>(data);
 
-  DCPL_CHECK_EQ(size, count)
-      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::pread(fd_, ptr, csize, off + size - tx_size);
+
+    DCPL_CHECK_EQ(csize, count)
+        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+
+    tx_size -= csize;
+    ptr += csize;
+  }
 }
 
 ssize_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
-  return ::pread(fd_, data, size, off);
+  std::size_t tx_size = size;
+  char* ptr = reinterpret_cast<char*>(data);
+
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::pread(fd_, ptr, csize, off + size - tx_size);
+
+    DCPL_CHECK_GE(count, 0)
+        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
+
+    tx_size -= count;
+    ptr += count;
+
+    if (count != csize) {
+      break;
+    }
+  }
+
+  return size - tx_size;
 }
 
 void file::sync() {

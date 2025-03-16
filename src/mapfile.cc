@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 
@@ -106,7 +107,20 @@ void mapfile::sync() {
       << "Cannot sync an mmap opened in read mode: " << path_;
 
   if ((mode_ & open_priv) != 0) {
-    ::write(fd_, base_, size_);
+    fileoff_t max_write = page_size() * 1024;
+    const char* ptr = reinterpret_cast<const char*>(base_);
+
+    for (fileoff_t written = 0; written < size_;) {
+      fileoff_t cwrite = std::min<fileoff_t>(size_ - written, max_write);
+      ::ssize_t count = ::pwrite(fd_, ptr, static_cast<std::size_t>(cwrite), written);
+
+      DCPL_ASSERT(count != -1)
+          << "Failed to write " << cwrite << "/" << size_
+          << " bytes (" << std::strerror(errno) << ") : " << path_;
+
+      written += cwrite;
+      ptr += cwrite;
+    }
   } else {
     DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
         << "Failed to sync mmap (" << std::strerror(errno) << ") : " << path_;
