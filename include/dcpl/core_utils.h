@@ -239,5 +239,10 @@ bool eof(T* stream) {
   return size == pos;
 }
 
+template<typename T>
+void sink(const T& value) {
+  volatile T no_discard = value;
+}
+
 }
 
