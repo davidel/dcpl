@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <span>
 #include <string>
+#include <string_view>
 
 #include "dcpl/assert.h"
 #include "dcpl/types.h"
@@ -34,6 +35,12 @@ class file {
       DCPL_CHECK_EQ(size % sizeof(T), 0);
 
       return { reinterpret_cast<T*>(base), size / sizeof(T) };
+    }
+
+    operator std::string_view() const {
+      std::span<char> mdata = data();
+
+      return { mdata.data(), mdata.size() };
     }
 
     void sync();
