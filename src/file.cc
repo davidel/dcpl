@@ -111,6 +111,26 @@ std::size_t pwrite_file(int fd, const void* data, std::size_t size, fileoff_t of
 
 }
 
+file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
+                 std::size_t align) :
+    mode_(mode),
+    offset_(offset),
+    size_(size),
+    align_(align) {
+  fd_ = ::dup(fd);
+  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
+                         << std::strerror(errno);
+
+  cleanup cleanups([this]() { ::close(fd_); });
+  int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
+  int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
+
+  base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
+  DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file: " << std::strerror(errno);
+
+  cleanups.reset();
+}
+
 file::mmap::mmap(mmap&& ref) :
     fd_(ref.fd_),
     mode_(ref.mode_),
@@ -145,26 +165,6 @@ void file::mmap::sync() {
 
   DCPL_ASSERT(::fdatasync(fd_) == 0)
       << "Failed to sync mmap file section: " << std::strerror(errno);
-}
-
-file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
-                 std::size_t align) :
-    mode_(mode),
-    offset_(offset),
-    size_(size),
-    align_(align) {
-  fd_ = ::dup(fd);
-  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
-                         << std::strerror(errno);
-
-  cleanup cleanups([this]() { ::close(fd_); });
-  int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
-  int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
-
-  base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
-  DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file: " << std::strerror(errno);
-
-  cleanups.reset();
 }
 
 file::file(std::string path, open_mode mode, int perms) :
