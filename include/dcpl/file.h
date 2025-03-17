@@ -24,12 +24,18 @@ class file {
 
   file(std::string path, open_mode mode, int perms = 0600);
 
+  file(int fd, std::string path, open_mode mode);
+
   file(const file& other) = delete;
 
   ~file();
 
   const std::string& path() const {
     return path_;
+  }
+
+  int fileno() const {
+    return fd_;
   }
 
   fileoff_t size();

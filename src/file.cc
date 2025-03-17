@@ -34,10 +34,16 @@ file::file(std::string path, open_mode mode, int perms) :
                          << "): " << path_;
 }
 
+file::file(int fd, std::string path, open_mode mode) :
+    path_(std::move(path)),
+    mode_(mode) {
+  fd_ = ::dup(fd);
+  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor ("
+                         << std::strerror(errno) << "): " << path_;
+}
+
 file::~file() {
-  if (fd_ != -1) {
-    ::close(fd_);
-  }
+  ::close(fd_);
 }
 
 fileoff_t file::size() {
