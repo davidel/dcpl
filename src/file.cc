@@ -194,6 +194,12 @@ ssize_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
   return size - tx_size;
 }
 
+void file::truncate(fileoff_t size) {
+  DCPL_ASSERT(::ftruncate(fd_, size) == 0)
+      << "Failed to resize file (" << std::strerror(errno)
+      << ") : " << path_;
+}
+
 void file::sync() {
   DCPL_ASSERT((mode_ & open_write) != 0)
       << "Cannot sync an mmap opened in read mode: " << path_;

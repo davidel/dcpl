@@ -56,6 +56,8 @@ class file {
 
   ssize_t pread_some(void* data, std::size_t size, fileoff_t off);
 
+  void truncate(fileoff_t size);
+
   void sync();
 
  private:
