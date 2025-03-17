@@ -7,7 +7,7 @@ namespace dcpl {
 
 atomic_write::atomic_write(std::string path, std::ios::openmode mode) :
     path_(std::move(path)),
-    temp_path_(temp_path(path_)),
+    temp_path_(get_temp_path(path_)),
     file_(open(temp_path_, mode | std::ios::out | std::ios::trunc)) {
 }
 

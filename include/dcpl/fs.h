@@ -18,9 +18,9 @@ void remove_all(const std::string& path);
 
 }
 
-std::string temp_path(const std::string& path);
+std::string get_temp_path(const std::string& path);
 
-std::string temp_path();
+std::string get_temp_path();
 
 }
 

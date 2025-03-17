@@ -8,10 +8,12 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
+#include <limits>
 
 #include "dcpl/assert.h"
 #include "dcpl/cleanup.h"
 #include "dcpl/constants.h"
+#include "dcpl/core_utils.h"
 #include "dcpl/system.h"
 
 namespace dcpl {
@@ -151,9 +153,13 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
     offset_(offset),
     size_(size),
     align_(align) {
-  fd_ = ::dup(fd);
-  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
-                         << std::strerror(errno);
+  if (fd >= 0) {
+    fd_ = ::dup(fd);
+    DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
+                           << std::strerror(errno);
+  } else {
+    fd_ = -fd;
+  }
 
   cleanup cleanups([this]() { ::close(fd_); });
   int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
@@ -191,18 +197,23 @@ file::file(int fd, std::string path, open_mode mode) :
 }
 
 file::~file() {
+  close();
+}
+
+void file::close() {
   if (fd_ != -1) {
     ::close(fd_);
+    fd_ = -1;
   }
 }
 
 fileoff_t file::size() {
   fileoff_t offset = tell();
-  fileoff_t size = seek(seek_end, 0);
+  fileoff_t file_size = seek(seek_end, 0);
 
   seek(seek_set, offset);
 
-  return size;
+  return file_size;
 }
 
 fileoff_t file::tell() {
@@ -303,10 +314,24 @@ file::mmap file::view(mmap_mode mode, fileoff_t offset, std::size_t size) {
   DCPL_ASSERT((mode & mmap_write) == 0 || (mode_ & open_write) != 0)
       << "Cannot create a writable view of a file opened in read mode: " << path_;
 
+  if (size == 0) {
+    fileoff_t file_size = this->size();
+
+    size = int_cast<std::size_t>(file_size - offset);
+  }
+
   std::size_t pgsize = page_size();
   std::size_t align = static_cast<std::size_t>(offset % pgsize);
 
   return mmap(fd_, mode, offset - align, size + align, align);
+}
+
+file::mmap file::view(std::string path, mmap_mode mode, fileoff_t offset,
+                      std::size_t size) {
+  open_mode file_mode = (mode & mmap_write) != 0 ? open_read | open_write : open_read;
+  file vfile(std::move(path), file_mode);
+
+  return vfile.view(mode, offset, size);
 }
 
 }

@@ -21,6 +21,8 @@ class file {
    public:
     mmap(mmap&& ref);
 
+    mmap(const mmap&) = delete;
+
     ~mmap();
 
     std::span<const char> data() const {
@@ -66,6 +68,8 @@ class file {
 
   ~file();
 
+  void close();
+
   const std::string& path() const {
     return path_;
   }
@@ -97,6 +101,9 @@ class file {
   void sync();
 
   mmap view(mmap_mode mode, fileoff_t offset, std::size_t size);
+
+  static mmap view(std::string path, mmap_mode mode, fileoff_t offset,
+                   std::size_t size);
 
  private:
   std::string path_;

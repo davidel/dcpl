@@ -151,6 +151,17 @@ T c_cast(S value) {
   return reinterpret_cast<T>(value);
 }
 
+template <typename T, typename S,
+          std::enable_if_t<std::is_integral_v<T>, T>* = nullptr,
+          std::enable_if_t<std::is_integral_v<S>, S>* = nullptr>
+T int_cast(const S& value) {
+  T t_cast = static_cast<T>(value);
+
+  DCPL_CHECK_EQ(value, static_cast<S>(t_cast));
+
+  return t_cast;
+}
+
 template <typename T>
 std::span<char> to_string(const T& value, std::span<char> buf,
                           std::enable_if_t<std::is_integral_v<T>, T>* = nullptr) {

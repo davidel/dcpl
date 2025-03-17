@@ -4,6 +4,8 @@
 #include <optional>
 #include <string>
 
+#include "dcpl/temp_path.h"
+
 namespace dcpl {
 
 class temp_file {
@@ -14,7 +16,7 @@ class temp_file {
   ~temp_file();
 
   const std::string& path() const {
-    return path_;
+    return path_.path();
   }
 
   std::fstream& file() {
@@ -29,13 +31,12 @@ class temp_file {
   }
 
   void release() {
-    released_ = true;
+    path_.release();
   }
 
  private:
-  std::string path_;
+  temp_path path_;
   std::fstream file_;
-  bool released_ = false;
   bool closed_ = false;
 };
 

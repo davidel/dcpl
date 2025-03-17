@@ -17,12 +17,12 @@
 #include "dcpl/fs.h"
 #include "dcpl/ivector.h"
 #include "dcpl/json/json.h"
-#include "dcpl/mapfile.h"
 #include "dcpl/memory.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
 #include "dcpl/temp_file.h"
+#include "dcpl/temp_path.h"
 #include "dcpl/threadpool.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -561,57 +561,73 @@ TEST(TempFile, API) {
   EXPECT_FALSE(stdfs::exists(path));
 }
 
-TEST(MapFile, Shared) {
-  static const std::size_t size = 1024 * 1024;
-  dcpl::temp_file tmp({});
-
-  tmp.close();
-
-  {
-    dcpl::mapfile mm(tmp.path(),
-                     dcpl::mapfile::open_read | dcpl::mapfile::open_write |
-                     dcpl::mapfile::open_create);
-
-    mm.resize(size);
-
-    EXPECT_EQ(mm.data<char>().size(), size);
-
-    mm.sync();
-  }
-
-  EXPECT_EQ(stdfs::file_size(tmp.path()), size);
-}
-
-TEST(MapFile, Private) {
-  static const std::size_t size = 1024 * 1024;
+TEST(FileView, Shared) {
+  static const std::size_t size = 4096 * 1024;
   static const char* const wrdata = "WRITTEN!";
-  dcpl::temp_file tmp({});
-
-  tmp.close();
-
+  dcpl::temp_path tmp;
   {
-    dcpl::mapfile mm(tmp.path(),
-                     dcpl::mapfile::open_read | dcpl::mapfile::open_write |
-                     dcpl::mapfile::open_create | dcpl::mapfile::open_priv);
+    dcpl::file file(tmp, dcpl::file::open_read | dcpl::file::open_write |
+                    dcpl::file::open_create);
 
-    mm.resize(size);
+    file.truncate(size);
 
-    auto data = mm.data<char>();
+    dcpl::file::mmap mm = file.view(dcpl::file::mmap_read | dcpl::file::mmap_write, 0, 0);
+
+    file.close();
+
+    std::span<char> data = mm.data();
 
     EXPECT_EQ(data.size(), size);
 
     std::memcpy(data.data() + size / 2, wrdata, std::strlen(wrdata));
 
     mm.sync();
+
+    EXPECT_EQ(stdfs::file_size(tmp), size);
   }
+  {
+    dcpl::file::mmap mm = dcpl::file::view(tmp, dcpl::file::mmap_read, 0, 0);
+    std::span<char> data = mm.data();
 
-  dcpl::file file(tmp.path(), dcpl::file::open_read);
-  char buffer[32];
+    EXPECT_EQ(data.size(), size);
 
-  file.pread(buffer, std::strlen(wrdata), size / 2);
+    EXPECT_EQ(std::memcmp(data.data() + size / 2, wrdata, std::strlen(wrdata)), 0);
+  }
+}
 
-  EXPECT_EQ(std::memcmp(buffer, wrdata, std::strlen(wrdata)), 0);
-  EXPECT_EQ(file.size(), size);
+TEST(FileFile, Private) {
+  static const std::size_t size = 4096 * 1024;
+  static const char* const wrdata = "WRITTEN!";
+  dcpl::temp_path tmp;
+  {
+    dcpl::file file(tmp, dcpl::file::open_read | dcpl::file::open_write |
+                    dcpl::file::open_create);
+
+    file.truncate(size);
+
+    dcpl::file::mmap mm = file.view(dcpl::file::mmap_read | dcpl::file::mmap_write |
+                                    dcpl::file::mmap_priv, 0, 0);
+
+    file.close();
+
+    std::span<char> data = mm.data();
+
+    EXPECT_EQ(data.size(), size);
+
+    std::memcpy(data.data() + size / 2, wrdata, std::strlen(wrdata));
+
+    mm.sync();
+
+    EXPECT_EQ(stdfs::file_size(tmp), size);
+  }
+  {
+    dcpl::file::mmap mm = dcpl::file::view(tmp, dcpl::file::mmap_read, 0, 0);
+    std::span<char> data = mm.data();
+
+    EXPECT_EQ(data.size(), size);
+
+    EXPECT_EQ(std::memcmp(data.data() + size / 2, wrdata, std::strlen(wrdata)), 0);
+  }
 }
 
 }
