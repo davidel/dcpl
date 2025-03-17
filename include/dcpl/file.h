@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <span>
 #include <string>
 
 #include "dcpl/types.h"
@@ -12,6 +13,37 @@ class file {
  public:
   using open_mode = std::size_t;
   using seek_mode = std::size_t;
+  using mmap_mode = std::size_t;
+
+  class mmap {
+    friend class file;
+
+   public:
+    mmap(mmap&& ref);
+
+    ~mmap();
+
+    std::span<const char> data() const {
+      return { reinterpret_cast<const char *>(base_) + align_, size_ - align_ };
+    }
+
+    std::span<char> data() {
+      return { reinterpret_cast<char *>(base_) + align_, size_ - align_ };
+    }
+
+    void sync();
+
+   private:
+    mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
+         std::size_t align);
+
+    int fd_ = -1;
+    mmap_mode mode_ = 0;
+    fileoff_t offset_ = 0;
+    std::size_t size_ = 0;
+    std::size_t align_ = 0;
+    void* base_ = nullptr;
+  };
 
   static constexpr open_mode open_read = 1;
   static constexpr open_mode open_write = 1 << 1;
@@ -21,6 +53,10 @@ class file {
   static constexpr seek_mode seek_set = 0;
   static constexpr seek_mode seek_cur = 1;
   static constexpr seek_mode seek_end = 2;
+
+  static constexpr mmap_mode mmap_read = 1;
+  static constexpr mmap_mode mmap_write = 1 << 1;
+  static constexpr mmap_mode mmap_priv = 1 << 2;
 
   file(std::string path, open_mode mode, int perms = 0600);
 
@@ -54,15 +90,17 @@ class file {
 
   void pread(void* data, std::size_t size, fileoff_t off);
 
-  ssize_t pread_some(void* data, std::size_t size, fileoff_t off);
+  std::size_t pread_some(void* data, std::size_t size, fileoff_t off);
 
   void truncate(fileoff_t size);
 
   void sync();
 
+  mmap view(mmap_mode mode, fileoff_t offset, std::size_t size);
+
  private:
   std::string path_;
-  open_mode mode_ = open_read;
+  open_mode mode_ = 0;
   int fd_ = -1;
 };
 

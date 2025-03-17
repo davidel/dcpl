@@ -1,6 +1,7 @@
 #include "dcpl/file.h"
 
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -9,12 +10,159 @@
 #include <cstring>
 
 #include "dcpl/assert.h"
+#include "dcpl/cleanup.h"
+#include "dcpl/constants.h"
+#include "dcpl/system.h"
 
 namespace dcpl {
 namespace {
 
 constexpr std::size_t max_rw_chunk = 1ULL << 30;
 
+std::size_t read_file(int fd, void* data, std::size_t size) {
+  std::size_t tx_size = size;
+  char* ptr = reinterpret_cast<char*>(data);
+
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::read(fd, ptr, csize);
+
+    if (count < 0) {
+      return consts::invalid_size;
+    }
+
+    tx_size -= count;
+    ptr += count;
+    if (count != csize) {
+      break;
+    }
+  }
+
+  return size - tx_size;
+}
+
+std::size_t write_file(int fd, const void* data, std::size_t size) {
+  std::size_t tx_size = size;
+  const char* ptr = reinterpret_cast<const char*>(data);
+
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::write(fd, ptr, csize);
+
+    if (count < 0) {
+      return consts::invalid_size;
+    }
+
+    tx_size -= count;
+    ptr += count;
+    if (count != csize) {
+      break;
+    }
+  }
+
+  return size - tx_size;
+}
+
+std::size_t pread_file(int fd, void* data, std::size_t size, fileoff_t off) {
+  std::size_t tx_size = size;
+  char* ptr = reinterpret_cast<char*>(data);
+
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::pread(fd, ptr, csize, off + size - tx_size);
+
+    if (count < 0) {
+      return consts::invalid_size;
+    }
+
+    tx_size -= count;
+    ptr += count;
+    if (count != csize) {
+      break;
+    }
+  }
+
+  return size - tx_size;
+}
+
+std::size_t pwrite_file(int fd, const void* data, std::size_t size, fileoff_t off) {
+  std::size_t tx_size = size;
+  const char* ptr = reinterpret_cast<const char*>(data);
+
+  while (tx_size > 0) {
+    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
+    dcpl::ssize_t count = ::pwrite(fd, ptr, csize, off + size - tx_size);
+
+    if (count < 0) {
+      return consts::invalid_size;
+    }
+
+    tx_size -= count;
+    ptr += count;
+    if (count != csize) {
+      break;
+    }
+  }
+
+  return size - tx_size;
+}
+
+}
+
+file::mmap::mmap(mmap&& ref) :
+    fd_(ref.fd_),
+    mode_(ref.mode_),
+    offset_(ref.offset_),
+    size_(ref.size_),
+    align_(ref.align_),
+    base_(ref.base_) {
+  ref.fd_ = -1;
+  ref.base_ = nullptr;
+}
+
+file::mmap::~mmap() {
+  if (base_ != nullptr) {
+    ::munmap(base_, size_);
+  }
+  if (fd_ != -1) {
+    ::close(fd_);
+  }
+}
+
+void file::mmap::sync() {
+  if ((mode_ & mmap_priv) != 0) {
+    std::size_t tx_size = pwrite_file(fd_, reinterpret_cast<char*>(base_) + align_,
+                                      size_ - align_, offset_ + align_);
+
+    DCPL_CHECK_EQ(tx_size, size_ - align_)
+        << "Failed to write file: " << std::strerror(errno);
+  } else {
+    DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
+        << "Failed to sync mmap: " << std::strerror(errno);
+  }
+
+  DCPL_ASSERT(::fdatasync(fd_) == 0)
+      << "Failed to sync mmap file section: " << std::strerror(errno);
+}
+
+file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
+                 std::size_t align) :
+    mode_(mode),
+    offset_(offset),
+    size_(size),
+    align_(align) {
+  fd_ = ::dup(fd);
+  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
+                         << std::strerror(errno);
+
+  cleanup cleanups([this]() { ::close(fd_); });
+  int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
+  int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
+
+  base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
+  DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file: " << std::strerror(errno);
+
+  cleanups.reset();
 }
 
 file::file(std::string path, open_mode mode, int perms) :
@@ -43,7 +191,9 @@ file::file(int fd, std::string path, open_mode mode) :
 }
 
 file::~file() {
-  ::close(fd_);
+  if (fd_ != -1) {
+    ::close(fd_);
+  }
 }
 
 fileoff_t file::size() {
@@ -87,114 +237,55 @@ fileoff_t file::seek(seek_mode pos, fileoff_t off) {
 }
 
 void file::write(const void* data, std::size_t size) {
-  std::size_t tx_size = size;
-  const char* ptr = reinterpret_cast<const char*>(data);
+  std::size_t tx_size = write_file(fd_, data, size);
 
-  while (tx_size > 0) {
-    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
-    dcpl::ssize_t count = ::write(fd_, ptr, csize);
-
-    DCPL_CHECK_EQ(csize, count)
-        << "Failed to write file (" << std::strerror(errno) << "): " << path_;
-
-    tx_size -= csize;
-    ptr += csize;
-  }
+  DCPL_CHECK_EQ(tx_size, size)
+      << "Failed to write file (" << std::strerror(errno) << "): " << path_;
 }
 
 void file::read(void* data, std::size_t size) {
-  std::size_t tx_size = size;
-  char* ptr = reinterpret_cast<char*>(data);
+  std::size_t tx_size = read_file(fd_, data, size);
 
-  while (tx_size > 0) {
-    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
-    dcpl::ssize_t count = ::read(fd_, ptr, csize);
-
-    DCPL_CHECK_EQ(csize, count)
-        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
-
-    tx_size -= csize;
-    ptr += csize;
-  }
+  DCPL_CHECK_EQ(tx_size, size)
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 }
 
 std::size_t file::read_some(void* data, std::size_t size) {
-  std::size_t tx_size = size;
-  char* ptr = reinterpret_cast<char*>(data);
+  std::size_t tx_size = read_file(fd_, data, size);
 
-  while (tx_size > 0) {
-    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
-    dcpl::ssize_t count = ::read(fd_, ptr, csize);
+  DCPL_ASSERT(tx_size != consts::invalid_size)
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 
-    DCPL_CHECK_GE(count, 0)
-        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
-
-    tx_size -= count;
-    ptr += count;
-
-    if (count != csize) {
-      break;
-    }
-  }
-
-  return size - tx_size;
+  return tx_size;
 }
 
 void file::pwrite(const void* data, std::size_t size, fileoff_t off) {
-  std::size_t tx_size = size;
-  const char* ptr = reinterpret_cast<const char*>(data);
+  std::size_t tx_size = pwrite_file(fd_, data, size, off);
 
-  while (tx_size > 0) {
-    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
-    dcpl::ssize_t count = ::pwrite(fd_, ptr, csize, off + size - tx_size);
-
-    DCPL_CHECK_EQ(csize, count)
-        << "Failed to write file (" << std::strerror(errno) << "): " << path_;
-
-    tx_size -= csize;
-    ptr += csize;
-  }
+  DCPL_CHECK_EQ(tx_size, size)
+      << "Failed to write file (" << std::strerror(errno) << "): " << path_;
 }
 
 void file::pread(void* data, std::size_t size, fileoff_t off) {
-  std::size_t tx_size = size;
-  char* ptr = reinterpret_cast<char*>(data);
+  std::size_t tx_size = pread_file(fd_, data, size, off);
 
-  while (tx_size > 0) {
-    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
-    dcpl::ssize_t count = ::pread(fd_, ptr, csize, off + size - tx_size);
-
-    DCPL_CHECK_EQ(csize, count)
-        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
-
-    tx_size -= csize;
-    ptr += csize;
-  }
+  DCPL_CHECK_EQ(tx_size, size)
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 }
 
-ssize_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
-  std::size_t tx_size = size;
-  char* ptr = reinterpret_cast<char*>(data);
+std::size_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
+  std::size_t tx_size = pread_file(fd_, data, size, off);
 
-  while (tx_size > 0) {
-    std::size_t csize = std::min<std::size_t>(tx_size, max_rw_chunk);
-    dcpl::ssize_t count = ::pread(fd_, ptr, csize, off + size - tx_size);
+  DCPL_ASSERT(tx_size != consts::invalid_size)
+      << "Failed to read file (" << std::strerror(errno) << "): " << path_;
 
-    DCPL_CHECK_GE(count, 0)
-        << "Failed to read file (" << std::strerror(errno) << "): " << path_;
-
-    tx_size -= count;
-    ptr += count;
-
-    if (count != csize) {
-      break;
-    }
-  }
-
-  return size - tx_size;
+  return tx_size;
 }
 
 void file::truncate(fileoff_t size) {
+  DCPL_ASSERT((mode_ & open_write) != 0)
+      << "Cannot change size of a file opened in read mode: " << path_;
+
   DCPL_ASSERT(::ftruncate(fd_, size) == 0)
       << "Failed to resize file (" << std::strerror(errno)
       << ") : " << path_;
@@ -206,6 +297,16 @@ void file::sync() {
 
   DCPL_ASSERT(::fdatasync(fd_) == 0)
       << "Failed to sync file (" << std::strerror(errno) << "): " << path_;
+}
+
+file::mmap file::view(mmap_mode mode, fileoff_t offset, std::size_t size) {
+  DCPL_ASSERT((mode & mmap_write) == 0 || (mode_ & open_write) != 0)
+      << "Cannot create a writable view of a file opened in read mode: " << path_;
+
+  std::size_t pgsize = page_size();
+  std::size_t align = static_cast<std::size_t>(offset % pgsize);
+
+  return mmap(fd_, mode, offset - align, size + align, align);
 }
 
 }
