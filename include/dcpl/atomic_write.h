@@ -9,6 +9,10 @@ class atomic_write {
  public:
   atomic_write(std::string path, std::ios::openmode mode);
 
+  atomic_write(atomic_write&&) = default;
+
+  atomic_write(const atomic_write&) = delete;
+
   ~atomic_write();
 
   const std::string& path() const {
