@@ -5,6 +5,7 @@
 #include <span>
 #include <string>
 
+#include "dcpl/assert.h"
 #include "dcpl/types.h"
 
 namespace dcpl {
@@ -25,12 +26,14 @@ class file {
 
     ~mmap();
 
-    std::span<const char> data() const {
-      return { reinterpret_cast<const char *>(base_) + align_, size_ - align_ };
-    }
+    template <typename T = char>
+    std::span<T> data() const {
+      char* base = reinterpret_cast<char*>(base_) + align_;
+      std::size_t size = size_ - align_;
 
-    std::span<char> data() {
-      return { reinterpret_cast<char *>(base_) + align_, size_ - align_ };
+      DCPL_CHECK_EQ(size % sizeof(T), 0);
+
+      return { reinterpret_cast<T*>(base), size / sizeof(T) };
     }
 
     void sync();

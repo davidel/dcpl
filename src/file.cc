@@ -153,13 +153,9 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
     offset_(offset),
     size_(size),
     align_(align) {
-  if (fd >= 0) {
-    fd_ = ::dup(fd);
-    DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
-                           << std::strerror(errno);
-  } else {
-    fd_ = -fd;
-  }
+  fd_ = ::dup(fd);
+  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
+                         << std::strerror(errno);
 
   cleanup cleanups([this]() { ::close(fd_); });
   int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
