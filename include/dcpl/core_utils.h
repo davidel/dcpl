@@ -36,8 +36,8 @@ map_sort(const T& data, const F& cmp) {
   std::vector<mpair> sorted;
 
   sorted.reserve(data.size());
-  for (const auto& it : data) {
-    sorted.push_back(mpair{it.first, it.second});
+  for (const auto& [key, value] : data) {
+    sorted.push_back(mpair{ key, value });
   }
 
   std::sort(sorted.begin(), sorted.end(), cmp);
