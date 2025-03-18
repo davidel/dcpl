@@ -19,6 +19,7 @@
 namespace dcpl {
 namespace {
 
+// Linux still has the limit of 2GB for read/write operations, even on 64bit builds.
 constexpr std::size_t max_rw_chunk = 1ULL << 30;
 
 std::size_t read_file(int fd, void* data, std::size_t size) {
@@ -121,7 +122,7 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
   DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
                          << std::strerror(errno);
 
-  cleanup cleanups([this]() { ::close(fd_); });
+  cleanup cleanups([fd = fd_]() { ::close(fd); });
   int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
   int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
 
@@ -290,18 +291,12 @@ std::size_t file::pread_some(void* data, std::size_t size, fileoff_t off) {
 }
 
 void file::truncate(fileoff_t size) {
-  DCPL_ASSERT((mode_ & open_write) != 0)
-      << "Cannot change size of a file opened in read mode: " << path_;
-
   DCPL_ASSERT(::ftruncate(fd_, size) == 0)
       << "Failed to resize file (" << std::strerror(errno)
       << ") : " << path_;
 }
 
 void file::sync() {
-  DCPL_ASSERT((mode_ & open_write) != 0)
-      << "Cannot sync an mmap opened in read mode: " << path_;
-
   DCPL_ASSERT(::fdatasync(fd_) == 0)
       << "Failed to sync file (" << std::strerror(errno) << "): " << path_;
 }
