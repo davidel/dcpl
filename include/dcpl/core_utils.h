@@ -24,8 +24,10 @@ namespace dcpl {
 namespace {
 
 template <typename T>
-using ref_pair = std::pair<std::reference_wrapper<const typename T::key_type>,
-                           std::reference_wrapper<const typename T::mapped_type>>;
+struct ref_pair {
+  std::reference_wrapper<const typename T::key_type> key;
+  std::reference_wrapper<const typename T::mapped_type> value;
+};
 
 }
 
