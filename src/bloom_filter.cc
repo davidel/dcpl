@@ -62,7 +62,7 @@ std::size_t bloom_filter::estimate_bits(std::size_t count,
                                         std::size_t entry_bits) {
   std::size_t nbits = count * entry_bits;
 
-  return dcpl::next_prime(nbits * 3 / 2);
+  return next_prime(nbits * 3 / 2);
 }
 
 }
