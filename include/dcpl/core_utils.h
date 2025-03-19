@@ -257,5 +257,15 @@ void sink(const T& value) {
   volatile T no_discard = value;
 }
 
+template <typename T>
+T vload(const void* ptr) {
+  return *reinterpret_cast<const T*>(ptr);
+}
+
+template <typename T>
+void vstore(void* ptr, const T& value) {
+  *reinterpret_cast<T*>(ptr) = value;
+}
+
 }
 

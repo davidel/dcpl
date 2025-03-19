@@ -77,7 +77,7 @@ class memory {
   T read() {
     DCPL_CHECK_GE(data_.size() - offset_, sizeof(T)) << "Read out of bounds";
 
-    T value = *reinterpret_cast<const T*>(data_.data() + offset_);
+    T value = vload<T>(data_.data() + offset_);
 
     offset_ += sizeof(T);
 
@@ -95,7 +95,7 @@ class memory {
   void write(const T& value) {
     DCPL_CHECK_GE(data_.size() - offset_, sizeof(T)) << "Write out of bounds";
 
-    *reinterpret_cast<T*>(data_.data() + offset_) = value;
+    vstore<T>(data_.data() + offset_, value);
     offset_ += sizeof(T);
   }
 
