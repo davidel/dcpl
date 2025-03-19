@@ -14,6 +14,8 @@ class bloom_filter {
 
   bool add(std::size_t hash);
 
+  void clear();
+
  private:
   std::vector<std::size_t> get_bitspos(std::size_t hash) const;
 

@@ -45,6 +45,11 @@ bool bloom_filter::add(std::size_t hash) {
   return was_present;
 }
 
+void bloom_filter::clear() {
+  bits_.clear();
+  count_ = 0;
+}
+
 std::vector<std::size_t> bloom_filter::get_bitspos(std::size_t hash) const {
   std::vector<std::size_t> bits(entry_bits_);
   int vbits = std::bit_width(bits_mod_);
