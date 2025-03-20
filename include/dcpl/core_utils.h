@@ -11,12 +11,15 @@
 #include <numeric>
 #include <span>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 // Dependencies must be limited!
+// The "dcpl/assert.h" include only depends on "dcpl/compiler.h" and "dcpl/pragmas.h"
+// which in turn have no dependencies.
 #include "dcpl/assert.h"
 
 namespace dcpl {
@@ -265,6 +268,25 @@ T vload(const void* ptr) {
 template <typename T>
 void vstore(void* ptr, const T& value) {
   *reinterpret_cast<T*>(ptr) = value;
+}
+
+template <typename F>
+void enum_lines(std::string_view data, const F& enum_fn) {
+  std::string_view enum_data = data;
+
+  while (!enum_data.empty()) {
+    std::string_view::size_type nlpos = enum_data.find('\n');
+
+    if (nlpos == std::string_view::npos) {
+      nlpos = enum_data.size();
+    }
+
+    std::string_view line = enum_data.substr(0, nlpos);
+
+    enum_fn(line);
+
+    enum_data.remove_prefix(std::min(nlpos + 1, enum_data.size()));
+  }
 }
 
 }
