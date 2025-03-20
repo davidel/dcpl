@@ -152,7 +152,8 @@ file::mmap::mmap(mmap&& ref) :
 
 file::mmap::~mmap() {
   if (base_ != nullptr) {
-    ::munmap(base_, size_);
+    DCPL_ASSERT(::munmap(base_, size_) != -1)
+        << "Failed to unmap file section: " << std::strerror(errno);
   }
   if (fd_ != -1) {
     ::close(fd_);
