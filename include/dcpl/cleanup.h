@@ -9,6 +9,8 @@ class cleanup {
  public:
   using clean_fn = std::function<void()>;
 
+  cleanup() = default;
+
   explicit cleanup(clean_fn fn) {
     cleanups_.push_back(std::move(fn));
   }

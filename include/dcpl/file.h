@@ -115,6 +115,8 @@ class file {
   static mmap view(std::string path, mmap_mode mode, fileoff_t offset,
                    std::size_t size);
 
+  static mmap view(mmap_mode mode, std::size_t size);
+
  private:
   std::string path_;
   open_mode mode_ = 0;

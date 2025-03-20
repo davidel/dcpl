@@ -595,6 +595,19 @@ TEST(FileView, Shared) {
   }
 }
 
+TEST(MMap, Anon) {
+  static const std::size_t size = 4096 * 8;
+  dcpl::file::mmap mm =
+      dcpl::file::view(dcpl::file::mmap_read | dcpl::file::mmap_write, size);
+  std::span<char> data = mm.data();
+
+  for (std::size_t i = 0; i < size; i += 1024) {
+    data[i] = static_cast<char>(i & 0xff);
+
+    EXPECT_EQ(data[i], static_cast<char>(i & 0xff));
+  }
+}
+
 TEST(FileFile, Private) {
   static const std::size_t size = 4096 * 1024;
   static const char* const wrdata = "WRITTEN!";

@@ -118,12 +118,19 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
     offset_(offset),
     size_(size),
     align_(align) {
-  fd_ = ::dup(fd);
-  DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
-                         << std::strerror(errno);
+  int flags = 0;
+  cleanup cleanups;
 
-  cleanup cleanups([fd = fd_]() { ::close(fd); });
-  int flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
+  if (fd != -1) {
+    fd_ = ::dup(fd);
+    DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
+                           << std::strerror(errno);
+    cleanups.push([fd = fd_]() { ::close(fd); });
+    flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
+  } else {
+    flags = MAP_PRIVATE | MAP_ANON;
+  }
+
   int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
 
   base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
@@ -153,6 +160,8 @@ file::mmap::~mmap() {
 }
 
 void file::mmap::sync() {
+  DCPL_ASSERT(fd_ != -1) << "Cannot sync anonymous mmap";
+
   if ((mode_ & mmap_priv) != 0) {
     std::size_t tx_size = pwrite_file(fd_, reinterpret_cast<char*>(base_) + align_,
                                       size_ - align_, offset_ + align_);
@@ -323,6 +332,10 @@ file::mmap file::view(std::string path, mmap_mode mode, fileoff_t offset,
   file vfile(std::move(path), file_mode);
 
   return vfile.view(mode, offset, size);
+}
+
+file::mmap file::view(mmap_mode mode, std::size_t size) {
+  return mmap(-1, mode, 0, size, 0);
 }
 
 }
