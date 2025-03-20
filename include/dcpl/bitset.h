@@ -14,11 +14,11 @@ class bitset {
   using map_type = std::uint8_t;
 
   explicit bitset(std::size_t count) :
-      bits_(round_up(count, byte_bits) / byte_bits, 0) {
+      bits_(round_up(count, map_type_bits) / map_type_bits, 0) {
   }
 
   std::size_t size() const {
-    return bits_.size() * byte_bits;
+    return bits_.size() * map_type_bits;
   }
 
   std::span<const map_type> data() const {
@@ -49,7 +49,7 @@ class bitset {
   }
 
  private:
-  static constexpr unsigned int byte_bits = bit_sizeof<map_type>();
+  static constexpr unsigned int map_type_bits = bit_sizeof<map_type>();
 
   struct bitpos {
     map_type* ptr = nullptr;
@@ -57,8 +57,8 @@ class bitset {
   };
 
   bitpos getpos(std::size_t pos) const {
-    std::size_t vpos = pos / byte_bits;
-    std::size_t bpos = pos % byte_bits;
+    std::size_t vpos = pos / map_type_bits;
+    std::size_t bpos = pos % map_type_bits;
 
     DCPL_CHECK_LT(vpos, bits_.size());
 
