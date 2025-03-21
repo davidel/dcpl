@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <random>
 #include <sstream>
@@ -179,7 +180,7 @@ TEST(UtilTest, Argsort) {
   float array[] = {1.2, -0.8, 12.44, 8.9, 5.1, 16.25, 2.4};
   std::span<float> sp_arr(array);
 
-  std::vector<std::size_t> indices = dcpl::argsort(sp_arr);
+  std::vector<std::size_t> indices = dcpl::argsort(sp_arr, std::less<float>());
   for (std::size_t i = 1; i < indices.size(); ++i) {
     EXPECT_LE(sp_arr[indices[i - 1]], sp_arr[indices[i]]);
   }

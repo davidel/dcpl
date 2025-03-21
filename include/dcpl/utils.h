@@ -164,21 +164,14 @@ std::size_t choice(const T& probs, G* rgen, bool normalize = false) {
   return probs.size() - 1;
 }
 
-template<typename T>
-std::vector<std::size_t> argsort(const T& array, bool descending = false) {
+template<typename T, typename F>
+std::vector<std::size_t> argsort(const T& array, const F& cmp) {
   std::vector<std::size_t> indices = iota(array.size());
 
-  if (descending) {
-    std::sort(indices.begin(), indices.end(),
-              [&array](std::size_t left, std::size_t right) {
-                return array[left] > array[right];
-              });
-  } else {
-    std::sort(indices.begin(), indices.end(),
-              [&array](std::size_t left, std::size_t right) {
-                return array[left] < array[right];
-              });
-  }
+  std::sort(indices.begin(), indices.end(),
+            [&array, &cmp](std::size_t left, std::size_t right) {
+              return cmp(array[left], array[right]);
+            });
 
   return indices;
 }
