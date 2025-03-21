@@ -385,9 +385,7 @@ T nstime() {
   return epoch.count();
 }
 
-inline double time() {
-  return nstime<double>() * 1e-9;
-}
+double time();
 
 }
 

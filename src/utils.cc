@@ -47,5 +47,9 @@ std::span<const char> to_span(const char* str) {
   return { str, std::strlen(str) };
 }
 
+double time() {
+  return nstime<double>() * 1e-9;
+}
+
 }
 
