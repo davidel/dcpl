@@ -91,7 +91,7 @@ std::map<std::string_view, const args::flag*> args::collect_args() const {
     all_args.emplace(fvalue.name, &fvalue);
   }
 
-  return std::move(all_args);
+  return all_args;
 }
 
 void args::show_help(const char* prog_name) const {

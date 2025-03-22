@@ -338,7 +338,7 @@ std::vector<B> load_file(const std::string& path, bool binary = true) {
   file.seekg(0);
   file.read(fdata.data(), fsize);
 
-  return std::move(fdata);
+  return fdata;
 }
 
 template <typename T>

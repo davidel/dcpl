@@ -36,7 +36,7 @@ std::string rand_string(std::size_t size, rnd_generator* rgen) {
     cref = chars[distrib(ergen.get())];
   }
 
-  return std::move(result);
+  return result;
 }
 
 std::span<const char> to_span(const std::string& str) {

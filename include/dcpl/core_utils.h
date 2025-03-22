@@ -47,7 +47,7 @@ map_sort(const T& data, const F& cmp) {
 
   std::sort(sorted.begin(), sorted.end(), cmp);
 
-  return std::move(sorted);
+  return sorted;
 }
 
 template <typename T, typename C>
@@ -72,7 +72,7 @@ std::unordered_map<typename C::value_type, T> unique_count(const C& data) {
     uniq[v] += static_cast<T>(1);
   }
 
-  return std::move(uniq);
+  return uniq;
 }
 
 template<typename T>
@@ -111,7 +111,7 @@ std::vector<T> to_vector_cast(const C& data) {
     dest.push_back(static_cast<T>(value));
   }
 
-  return std::move(dest);
+  return dest;
 }
 
 template <typename T, typename F>
@@ -122,7 +122,7 @@ std::string to_helper(const T& data, const F& tfn) {
     result[i] = static_cast<char>(tfn(static_cast<unsigned char>(data[i])));
   }
 
-  return std::move(result);
+  return result;
 }
 
 template <typename T>

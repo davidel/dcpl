@@ -43,7 +43,7 @@ std::fstream open(const std::string& path, std::ios::openmode mode) {
       "Opening file \"" + path + "\"" };
   }
 
-  return std::move(file);
+  return file;
 }
 
 }
