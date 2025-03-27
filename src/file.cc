@@ -112,8 +112,9 @@ std::size_t pwrite_file(int fd, const void* data, std::size_t size, fileoff_t of
 
 }
 
-file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
-                 std::size_t align) :
+file::mmap::mmap(std::string path, int fd, mmap_mode mode, fileoff_t offset,
+                 std::size_t size, std::size_t align) :
+    path_(std::move(path)),
     mode_(mode),
     offset_(offset),
     size_(size),
@@ -123,8 +124,8 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
 
   if (fd != -1) {
     fd_ = ::dup(fd);
-    DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor: "
-                           << std::strerror(errno);
+    DCPL_ASSERT(fd_ != -1) << "Unable to duplicate file descriptor for \""
+                           << path_ << "\": " << std::strerror(errno);
     cleanups.push([fd = fd_]() { ::close(fd); });
     flags = (mode_ & mmap_priv) != 0 ? MAP_PRIVATE : MAP_SHARED;
   } else {
@@ -138,13 +139,15 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
     int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
 
     base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
-    DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file: " << std::strerror(errno);
+    DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file \""
+                                     << path_ << "\": " << std::strerror(errno);
   }
 
   cleanups.reset();
 }
 
 file::mmap::mmap(mmap&& ref) :
+    path_(std::move(ref.path_)),
     fd_(ref.fd_),
     mode_(ref.mode_),
     offset_(ref.offset_),
@@ -158,7 +161,8 @@ file::mmap::mmap(mmap&& ref) :
 file::mmap::~mmap() {
   if (base_ != nullptr) {
     DCPL_ASSERT(::munmap(base_, size_) != -1)
-        << "Failed to unmap file section: " << std::strerror(errno);
+        << "Failed to unmap file section for \"" << path_
+        << "\": " << std::strerror(errno);
   }
   if (fd_ != -1) {
     ::close(fd_);
@@ -173,14 +177,17 @@ void file::mmap::sync() {
                                       size_ - align_, offset_ + align_);
 
     DCPL_CHECK_EQ(tx_size, size_ - align_)
-        << "Failed to write file: " << std::strerror(errno);
+        << "Failed to write file \"" << path_ << "\": "
+        << std::strerror(errno);
   } else if (base_ != nullptr) {
     DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
-        << "Failed to sync mmap: " << std::strerror(errno);
+        << "Failed to sync mmap \"" << path_ << "\": "
+        << std::strerror(errno);
   }
 
   DCPL_ASSERT(::fdatasync(fd_) == 0)
-      << "Failed to sync mmap file section: " << std::strerror(errno);
+      << "Failed to sync mmap file \"" << path_ << "\": "
+      << std::strerror(errno);
 }
 
 file::file(std::string path, open_mode mode, int perms) :
@@ -329,7 +336,7 @@ file::mmap file::view(mmap_mode mode, fileoff_t offset, std::size_t size) {
   std::size_t pgsize = page_size();
   std::size_t align = static_cast<std::size_t>(offset % pgsize);
 
-  return mmap(fd_, mode, offset - align, size + align, align);
+  return mmap(path_, fd_, mode, offset - align, size + align, align);
 }
 
 file::mmap file::view(std::string path, mmap_mode mode, fileoff_t offset,
@@ -341,7 +348,7 @@ file::mmap file::view(std::string path, mmap_mode mode, fileoff_t offset,
 }
 
 file::mmap file::view(mmap_mode mode, std::size_t size) {
-  return mmap(-1, mode, 0, size, 0);
+  return mmap("", -1, mode, 0, size, 0);
 }
 
 }

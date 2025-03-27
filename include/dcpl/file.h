@@ -46,9 +46,10 @@ class file {
     void sync();
 
    private:
-    mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
-         std::size_t align);
+    mmap(std::string path, int fd, mmap_mode mode, fileoff_t offset,
+         std::size_t size, std::size_t align);
 
+    std::string path_;
     int fd_ = -1;
     mmap_mode mode_ = 0;
     fileoff_t offset_ = 0;
