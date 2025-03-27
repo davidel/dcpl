@@ -35,6 +35,30 @@ class bfloat16 {
     return to_float() / value;
   }
 
+  bfloat16& operator+=(float value) {
+    value_ = to_bfloat16(to_float() + value);
+
+    return *this;
+  }
+
+  bfloat16& operator-=(float value) {
+    value_ = to_bfloat16(to_float() - value);
+
+    return *this;
+  }
+
+  bfloat16& operator*=(float value) {
+    value_ = to_bfloat16(to_float() * value);
+
+    return *this;
+  }
+
+  bfloat16& operator/=(float value) {
+    value_ = to_bfloat16(to_float() / value);
+
+    return *this;
+  }
+
   auto operator<=>(float value) const {
     return to_float() <=> value;
   }

@@ -671,6 +671,12 @@ TEST(BFloat16, Operations) {
 
   EXPECT_EQ(mul_f_value, mul_fr_value);
   EXPECT_LT(value, 21.17f);
+
+  dcpl::bfloat16 vx(mul_f_value);
+
+  vx += 1.0f;
+
+  EXPECT_LT(std::fabs(mul_f_value + 1.0f - vx), mul_f_value * 0.01f);
 }
 
 }
