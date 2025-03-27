@@ -35,6 +35,10 @@ class bfloat16 {
     return to_float() / value;
   }
 
+  auto operator<=>(float value) const {
+    return to_float() <=> value;
+  }
+
   operator float() const {
     return to_float();
   }

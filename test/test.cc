@@ -670,6 +670,7 @@ TEST(BFloat16, Operations) {
   float mul_fr_value = value * 17.21f;
 
   EXPECT_EQ(mul_f_value, mul_fr_value);
+  EXPECT_LT(value, 21.17f);
 }
 
 }
