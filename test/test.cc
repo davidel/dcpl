@@ -3,6 +3,7 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <numbers>
 #include <random>
 #include <sstream>
 #include <string>
@@ -12,6 +13,7 @@
 #include "gtest/gtest.h"
 
 #include "dcpl/any.h"
+#include "dcpl/bfloat16.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
 #include "dcpl/file.h"
@@ -642,6 +644,13 @@ TEST(FileFile, Private) {
 
     EXPECT_EQ(std::memcmp(data.data() + size / 2, wrdata, std::strlen(wrdata)), 0);
   }
+}
+
+TEST(BFloat16, Precision) {
+  dcpl::bfloat16 pi(std::numbers::pi);
+  double err = std::fabs(std::numbers::pi - static_cast<double>(pi)) / std::numbers::pi;
+
+  EXPECT_LT(err, 0.01);
 }
 
 }
