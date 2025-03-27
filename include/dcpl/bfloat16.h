@@ -13,28 +13,30 @@ class bfloat16 {
       value_(to_bfloat16(value)) {
   }
 
-  bfloat16(double value) :
-      value_(to_bfloat16(static_cast<float>(value))) {
-  }
-
   bfloat16& operator=(float value) {
     value_ = to_bfloat16(value);
 
     return *this;
   }
 
-  bfloat16& operator=(double value) {
-    value_ = to_bfloat16(static_cast<float>(value));
+  float operator+(float value) const {
+    return to_float() + value;
+  }
 
-    return *this;
+  float operator-(float value) const {
+    return to_float() - value;
+  }
+
+  float operator*(float value) const {
+    return to_float() * value;
+  }
+
+  float operator/(float value) const {
+    return to_float() / value;
   }
 
   operator float() const {
     return to_float();
-  }
-
-  operator double() const {
-    return static_cast<double>(to_float());
   }
 
   friend std::ostream& operator<<(std::ostream& os, const bfloat16& value) {

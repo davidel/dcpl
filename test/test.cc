@@ -653,6 +653,25 @@ TEST(BFloat16, Precision) {
   EXPECT_LT(err, 0.01);
 }
 
+TEST(BFloat16, Operations) {
+  dcpl::bfloat16 value(std::numbers::pi);
+
+  float sum_f_value = 17.21f + value;
+  float sum_fr_value = value + 17.21f;
+
+  EXPECT_EQ(sum_f_value, sum_fr_value);
+
+  float sub_f_value = 17.21f - value;
+  float sub_fr_value = value - 17.21f;
+
+  EXPECT_EQ(sub_f_value, -sub_fr_value);
+
+  float mul_f_value = 17.21f * value;
+  float mul_fr_value = value * 17.21f;
+
+  EXPECT_EQ(mul_f_value, mul_fr_value);
+}
+
 }
 
 int main(int argc, char **argv) {
