@@ -131,10 +131,15 @@ file::mmap::mmap(int fd, mmap_mode mode, fileoff_t offset, std::size_t size,
     flags = MAP_PRIVATE | MAP_ANON;
   }
 
-  int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
+  // The ::mmap() API is supposed to fail with zero bytes mappings, and we want to
+  // be able to create such mappings. We simply let `base_` remain nullptr and we
+  // handle such case in other APIs.
+  if (size_ > 0) {
+    int prot = (mode_ & mmap_write) != 0 ? PROT_READ | PROT_WRITE : PROT_READ;
 
-  base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
-  DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file: " << std::strerror(errno);
+    base_ = ::mmap(nullptr, size_, prot, flags, fd_, offset_);
+    DCPL_ASSERT(base_ != MAP_FAILED) << "Failed to mmap file: " << std::strerror(errno);
+  }
 
   cleanups.reset();
 }
@@ -169,7 +174,7 @@ void file::mmap::sync() {
 
     DCPL_CHECK_EQ(tx_size, size_ - align_)
         << "Failed to write file: " << std::strerror(errno);
-  } else {
+  } else if (base_ != nullptr) {
     DCPL_ASSERT(::msync(base_, size_, MS_SYNC) == 0)
         << "Failed to sync mmap: " << std::strerror(errno);
   }
