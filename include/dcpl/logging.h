@@ -73,3 +73,5 @@ class logger : public noop {
 
 }
 
+namespace dcplog = dcpl::logging;
+
