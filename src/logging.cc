@@ -135,15 +135,11 @@ void logger::init() {
 }
 
 int logger::register_sink(sink_fn sinkfn) {
-  int sid;
-  {
-    std::lock_guard guard(sinks_lock);
+  std::lock_guard guard(sinks_lock);
+  int sid = next_sinkfn_id;
 
-    sinks.emplace(next_sinkfn_id, std::move(sinkfn));
-
-    sid = next_sinkfn_id;
-    ++next_sinkfn_id;
-  }
+  sinks.emplace(sid, std::move(sinkfn));
+  ++next_sinkfn_id;
 
   return sid;
 }
