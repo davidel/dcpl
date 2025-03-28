@@ -97,7 +97,7 @@ std::string logger::create_header() const {
 
   const char* fname = std::strrchr(path_, '/');
 
-  ss << time_buffer << "." << us_buffer  << "\t" << os::getpid() << " "
+  ss << time_buffer << "." << us_buffer  << " " << os::getpid() << " "
      << (fname != nullptr ? fname + 1 : path_) << ":" << lineno_ << "] ";
 
   return ss.str();
