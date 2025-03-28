@@ -1,5 +1,6 @@
 #include "dcpl/logging.h"
 
+#include <array>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
@@ -21,14 +22,14 @@ namespace {
 
 static constexpr int lid_size = 2;
 
-std::map<int, const char*> lev_to_name{
-  { SPAM, "SPAM" },
-  { VERBOSE, "VERBOSE" },
-  { DEBUG, "DEBUG" },
-  { INFO, "INFO" },
-  { WARNING, "WARNING" },
-  { ERROR, "ERROR" },
-  { CRITICAL, "CRITICAL" }
+const std::array<const char*, 7> lev_to_name{
+  "SPAM",
+  "VERBOSE",
+  "DEBUG",
+  "INFO",
+  "WARNING",
+  "ERROR",
+  "CRITICAL"
 };
 
 std::once_flag init_flag;
@@ -40,7 +41,7 @@ std::string_view get_level_id(int level, char lid[lid_size]) {
   static_assert(LEVEL_SPACE <= 10);
   static_assert(lid_size == 2);
 
-  int base = (level / LEVEL_SPACE) * LEVEL_SPACE;
+  int base = level / LEVEL_SPACE;
   int offset = level % LEVEL_SPACE;
   const char* name = lev_to_name.at(base);
 
