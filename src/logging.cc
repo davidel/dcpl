@@ -68,12 +68,12 @@ logger::~logger() {
   std::string hdr = create_header();
   std::string msg = ss_.str();
   auto log_fn = [&](std::string_view msg) {
-    std::lock_guard guard(sinks_lock);
-
     for (const auto& [sid, sinkfn] : sinks) {
       sinkfn(hdr, msg);
     }
   };
+
+  std::lock_guard guard(sinks_lock);
 
   enum_lines(msg, log_fn);
 }
