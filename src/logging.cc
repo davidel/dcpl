@@ -22,7 +22,7 @@ namespace dcpl {
 namespace logging {
 namespace {
 
-static constexpr int lid_size = 2;
+static constexpr int lid_size = 1;
 
 const std::array<const char*, 7> lev_to_name{
   "SPAM",
@@ -36,26 +36,21 @@ const std::array<const char*, 7> lev_to_name{
 
 std::once_flag init_flag;
 int next_sinkfn_id = 1;
+bool stderr_log = true;
 std::map<int, logger::sink_fn> sinks;
 std::shared_mutex sinks_lock;
 
 std::string_view get_level_id(int level, char lid[lid_size]) {
   static_assert(LEVEL_SPACE <= 10);
-  static_assert(lid_size == 2);
+  static_assert(lid_size == 1);
 
   DCPL_CHECK_GE(level, LEVEL_MIN);
   DCPL_CHECK_LT(level, LEVEL_MAX);
 
   int base = level / LEVEL_SPACE;
-  int offset = level % LEVEL_SPACE;
   const char* name = lev_to_name.at(base);
 
   lid[0] = name[0];
-  if (offset == 0) {
-    lid[1] = name[1];
-  } else {
-    lid[1] = "0123456789"[offset];
-  }
 
   return { lid, lid_size };
 }
@@ -86,18 +81,18 @@ int parse_level(std::string_view level_str) {
   return level;
 }
 
-void stderr_logger(std::string_view hdr, std::string_view msg) {
-  std::cerr << hdr << msg << "\n";
-}
-
 }
 
 logger::~logger() {
-  std::call_once(init_flag, []() { logger::init(); });
+  std::call_once(init_flag, []() { init(); });
 
   std::string hdr = create_header();
   std::string msg = ss_.str();
   auto log_fn = [&](std::string_view msg) {
+    if (stderr_log) {
+      std::cerr << hdr << msg << "\n";
+    }
+
     for (const auto& [sid, sinkfn] : sinks) {
       sinkfn(hdr, msg);
     }
@@ -133,9 +128,7 @@ void logger::init() {
     logger::current_level = parse_level(*log_level);
   }
 
-  if (getenv<int>("DCPL_STDERR_LOG", 1) != 0) {
-    register_sink(stderr_logger);
-  }
+  stderr_log = getenv<int>("DCPL_STDERR_LOG", 1) != 0;
 
   std::optional<std::string> log_paths = getenv("DCPL_LOG_PATHS");
 
