@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -11,7 +12,6 @@
 #include "dcpl/assert.h"
 #include "dcpl/core_utils.h"
 #include "dcpl/env.h"
-#include "dcpl/file.h"
 #include "dcpl/os.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -121,9 +121,9 @@ void logger::init() {
     std::vector<std::string> paths = split_line<std::string>(*log_paths, ';');
 
     for (const auto& path : paths) {
-      std::shared_ptr<file> logfile =
-          std::make_shared<file>(path, file::open_write | file::open_create |
-                                 file::open_append);
+      std::shared_ptr<std::fstream> logfile =
+          std::make_shared<std::fstream>(open(path, std::ios::out | std::ios::ate));
+
       auto logfn = [logfile](std::string_view hdr, std::string_view msg) {
         logfile->write(hdr.data(), hdr.size());
         logfile->write(msg.data(), msg.size());
