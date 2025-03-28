@@ -4,9 +4,13 @@
 #include <cstring>
 #include <ctime>
 #include <map>
+#include <memory>
 #include <mutex>
 
+#include "dcpl/assert.h"
 #include "dcpl/core_utils.h"
+#include "dcpl/env.h"
+#include "dcpl/file.h"
 #include "dcpl/os.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -50,6 +54,10 @@ std::string_view get_level_id(int level, char lid[lid_size]) {
   return { lid, lid_size };
 }
 
+void stderr_logger(std::string_view hdr, std::string_view msg) {
+  std::cerr << hdr << msg << "\n";
+}
+
 }
 
 logger::~logger() {
@@ -57,13 +65,11 @@ logger::~logger() {
 
   std::string hdr = create_header();
   std::string msg = ss_.str();
-  auto log_fn = [&](std::string_view line) {
-    std::cerr << hdr << line << "\n";
-
+  auto log_fn = [&](std::string_view msg) {
     std::lock_guard guard(sinks_lock);
 
     for (const auto& [sid, sinkfn] : sinks) {
-      sinkfn(hdr, line);
+      sinkfn(hdr, msg);
     }
   };
 
@@ -97,7 +103,35 @@ std::string logger::create_header() const {
 }
 
 void logger::init() {
+  int level = getenv<int>("DCPL_LOG_LEVEL", INFO);
 
+  DCPL_CHECK_GE(level, LEVEL_MIN);
+  DCPL_CHECK_LT(level, LEVEL_MAX);
+
+  logger::current_level = level;
+
+  if (getenv<int>("DCPL_STDERR_LOG", 1) != 0) {
+    register_sink(stderr_logger);
+  }
+
+  std::optional<std::string> log_paths = getenv("DCPL_LOG_PATHS");
+
+  if (log_paths) {
+    std::vector<std::string> paths = split_line<std::string>(*log_paths, ';');
+
+    for (const auto& path : paths) {
+      std::shared_ptr<file> logfile =
+          std::make_shared<file>(path, file::open_write | file::open_create |
+                                 file::open_append);
+      auto logfn = [logfile](std::string_view hdr, std::string_view msg) {
+        logfile->write(hdr.data(), hdr.size());
+        logfile->write(msg.data(), msg.size());
+        logfile->write("\n", 1);
+      };
+
+      register_sink(std::move(logfn));
+    }
+  }
 }
 
 int logger::register_sink(sink_fn sinkfn) {

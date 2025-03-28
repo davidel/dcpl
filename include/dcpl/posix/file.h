@@ -62,6 +62,7 @@ class file {
   static constexpr open_mode open_write = 1 << 1;
   static constexpr open_mode open_create = 1 << 2;
   static constexpr open_mode open_trunc = 1 << 3;
+  static constexpr open_mode open_append = 1 << 4;
 
   static constexpr seek_mode seek_set = 0;
   static constexpr seek_mode seek_cur = 1;

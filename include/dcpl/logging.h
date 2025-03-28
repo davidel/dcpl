@@ -19,6 +19,9 @@ constexpr int WARNING = INFO + LEVEL_SPACE;
 constexpr int ERROR = WARNING + LEVEL_SPACE;
 constexpr int CRITICAL = ERROR + LEVEL_SPACE;
 
+constexpr int LEVEL_MIN = SPAM;
+constexpr int LEVEL_MAX = CRITICAL + LEVEL_SPACE;
+
 struct noop { };
 
 class logger : public noop {

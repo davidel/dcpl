@@ -270,23 +270,39 @@ void vstore(void* ptr, const T& value) {
   *reinterpret_cast<T*>(ptr) = value;
 }
 
-template <typename F>
-void enum_lines(std::string_view data, const F& enum_fn) {
-  std::string_view enum_data = data;
+template <typename D, typename C, typename F>
+void enum_splits(D data, C sep, const F& enum_fn) {
+  D enum_data(data);
 
   while (!enum_data.empty()) {
-    std::string_view::size_type nlpos = enum_data.find('\n');
+    typename D::size_type nlpos = enum_data.find(sep);
 
-    if (nlpos == std::string_view::npos) {
+    if (nlpos == D::npos) {
       nlpos = enum_data.size();
     }
 
-    std::string_view line = enum_data.substr(0, nlpos);
+    D line = enum_data.substr(0, nlpos);
 
     enum_fn(line);
 
     enum_data.remove_prefix(std::min(nlpos + 1, enum_data.size()));
   }
+}
+
+template <typename F>
+void enum_lines(std::string_view data, const F& enum_fn) {
+  enum_splits(data, '\n', enum_fn);
+}
+
+template <typename T = std::string_view>
+std::vector<T> split_line(std::string_view data, char sep) {
+  std::vector<T> splits;
+
+  enum_splits(data, sep, [&](std::string_view part) {
+    splits.emplace_back(part);
+  });
+
+  return splits;
 }
 
 }

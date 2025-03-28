@@ -201,6 +201,9 @@ file::file(std::string path, open_mode mode, int perms) :
   if ((mode_ & open_trunc) != 0) {
     file_mode |= O_TRUNC;
   }
+  if ((mode_ & open_append) != 0) {
+    file_mode |= O_APPEND;
+  }
 
   fd_ = ::open(path_.c_str(), file_mode, perms);
   DCPL_ASSERT(fd_ != -1) << "Unable to open file (" << std::strerror(errno)
