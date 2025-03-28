@@ -1,6 +1,6 @@
 #include "dcpl/os.h"
 
-#include <math.h>
+#include <time.h>
 
 namespace dcpl {
 namespace os {
