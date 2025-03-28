@@ -36,7 +36,7 @@ const std::array<const char*, 7> lev_to_name{
 std::once_flag init_flag;
 int next_sinkfn_id = 1;
 std::map<int, logger::sink_fn> sinks;
-std::mutex sinks_lock;
+std::recursive_mutex sinks_lock;
 
 std::string_view get_level_id(int level, char lid[lid_size]) {
   static_assert(LEVEL_SPACE <= 10);
