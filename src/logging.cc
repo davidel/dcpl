@@ -43,6 +43,9 @@ std::string_view get_level_id(int level, char lid[lid_size]) {
   static_assert(LEVEL_SPACE <= 10);
   static_assert(lid_size == 2);
 
+  DCPL_CHECK_GE(level, LEVEL_MIN);
+  DCPL_CHECK_LT(level, LEVEL_MAX);
+
   int base = level / LEVEL_SPACE;
   int offset = level % LEVEL_SPACE;
   const char* name = lev_to_name.at(base);
@@ -55,6 +58,32 @@ std::string_view get_level_id(int level, char lid[lid_size]) {
   }
 
   return { lid, lid_size };
+}
+
+int parse_level(std::string_view level_str) {
+  std::string_view::size_type dpos = level_str.find(':');
+  int offset = 0;
+
+  if (dpos != std::string_view::npos) {
+    offset = to_number<int>(level_str.substr(dpos + 1));
+    level_str = level_str.substr(0, dpos);
+  }
+
+  int base = 0;
+
+  for (auto name : lev_to_name) {
+    if (level_str == name) {
+      break;
+    }
+    base += LEVEL_SPACE;
+  }
+
+  int level = base + offset;
+
+  DCPL_CHECK_GE(level, LEVEL_MIN);
+  DCPL_CHECK_LT(level, LEVEL_MAX);
+
+  return level;
 }
 
 void stderr_logger(std::string_view hdr, std::string_view msg) {
@@ -98,12 +127,11 @@ std::string logger::create_header() const {
 }
 
 void logger::init() {
-  int level = getenv<int>("DCPL_LOG_LEVEL", INFO);
+  std::optional<std::string> log_level = getenv("DCPL_LOG_LEVEL");
 
-  DCPL_CHECK_GE(level, LEVEL_MIN);
-  DCPL_CHECK_LT(level, LEVEL_MAX);
-
-  logger::current_level = level;
+  if (log_level) {
+    logger::current_level = parse_level(*log_level);
+  }
 
   if (getenv<int>("DCPL_STDERR_LOG", 1) != 0) {
     register_sink(stderr_logger);
