@@ -24,6 +24,20 @@ project(dcpl)
 file(GLOB DCPL_HEADERS "include/dcpl/*.h" "include/dcpl/coro/*.h")
 file(GLOB DCPL_SOURCES "src/*.cc" "src/coro/*.cc")
 
+if (UNIX)
+  file(GLOB DCPL_OS_HEADERS "include/dcpl/posix/*.h")
+  file(GLOB DCPL_OS_SOURCES "src/posix/*.cc")
+  list(APPEND DCPL_HEADERS ${DCPL_OS_HEADERS})
+  list(APPEND DCPL_SOURCES ${DCPL_OS_SOURCES})
+endif ()
+
+if (WIN32)
+  file(GLOB DCPL_OS_HEADERS "include/dcpl/windows/*.h")
+  file(GLOB DCPL_OS_SOURCES "src/windows/*.cc")
+  list(APPEND DCPL_HEADERS ${DCPL_OS_HEADERS})
+  list(APPEND DCPL_SOURCES ${DCPL_OS_SOURCES})
+endif ()
+
 add_library(dcpl STATIC
   ${DCPL_HEADERS}
   ${DCPL_SOURCES}
