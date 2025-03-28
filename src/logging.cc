@@ -88,8 +88,10 @@ std::string logger::create_header() const {
   std::snprintf(us_buffer, sizeof(us_buffer), "%06ld",
                 static_cast<long>((now % s2nano) / 1000));
 
+  const char* fname = std::strrchr(path_, '/');
+
   ss << time_buffer << "." << us_buffer  << "\t" << os::getpid() << " "
-     << path_ << ":" << lineno_ << "] ";
+     << (fname != nullptr ? fname + 1 : path_) << ":" << lineno_ << "] ";
 
   return ss.str();
 }
