@@ -93,7 +93,7 @@ std::string logger::create_header() const {
   char us_buffer[16];
 
   std::snprintf(us_buffer, sizeof(us_buffer), "%06ld",
-                static_cast<long>((now % s2nano) / 1000));
+                static_cast<long>((now % s2nano + 500) / 1000));
 
   const char* fname = std::strrchr(path_, '/');
 
