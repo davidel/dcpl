@@ -12,6 +12,7 @@
 #include "dcpl/assert.h"
 #include "dcpl/core_utils.h"
 #include "dcpl/env.h"
+#include "dcpl/format.h"
 #include "dcpl/os.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -85,19 +86,11 @@ std::string logger::create_header() const {
   ss << get_level_id(level_, lid);
 
   auto now = nstime();
-  std::tm time_data = os::localtime(static_cast<std::time_t>(now / s2nano));
-  char time_buffer[32];
-
-  std::strftime(time_buffer, sizeof(time_buffer), "%Y%m%d %H:%M:%S", &time_data);
-
-  char us_buffer[16];
-
-  std::snprintf(us_buffer, sizeof(us_buffer), "%06ld",
-                static_cast<long>((now % s2nano + 500) / 1000));
-
   const char* fname = std::strrchr(path_, '/');
 
-  ss << time_buffer << "." << us_buffer  << " " << os::getpid() << " "
+  ss << format_time("%Y%m%d %H:%M:%S", static_cast<std::time_t>(now / s2nano))
+     << format(".%06ld", static_cast<long>((now % s2nano) / 1000))
+     << " " << os::getpid() << " "
      << (fname != nullptr ? fname + 1 : path_) << ":" << lineno_ << "] ";
 
   return ss.str();

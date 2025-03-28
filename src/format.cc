@@ -5,8 +5,30 @@
 #include <sstream>
 
 #include "dcpl/core_utils.h"
+#include "dcpl/os.h"
 
 namespace dcpl {
+
+std::ostream& operator<<(std::ostream& stream, const format_time& fmt) {
+  constexpr std::size_t buffer_size = 4096;
+  std::tm time_data = os::localtime(fmt.epoch_time_);
+  char time_buffer[64];
+
+  std::size_t size = std::strftime(time_buffer, sizeof(time_buffer), fmt.fmt_, &time_data);
+
+  if (size != 0) {
+    stream << time_buffer;
+  } else {
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(buffer_size);
+
+    size = std::strftime(buffer.get(), buffer_size, fmt.fmt_, &time_data);
+    DCPL_ASSERT(size != 0);
+
+    stream << buffer.get();
+  }
+
+  return stream;
+}
 
 std::string format_duration(double elapsed) {
   DCPL_CHECK_GE(elapsed, 0.0) << "Duration must be non negative";

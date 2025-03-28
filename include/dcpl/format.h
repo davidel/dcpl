@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <ctime>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -38,6 +39,20 @@ class format {
  private:
   const char* fmt_ = nullptr;
   T value_;
+};
+
+class format_time {
+ public:
+  format_time(const char* fmt, std::time_t epoch_time) :
+      fmt_(fmt),
+      epoch_time_(epoch_time) {
+  }
+
+  friend std::ostream& operator<<(std::ostream& stream, const format_time& fmt);
+
+ private:
+  const char* fmt_ = nullptr;
+  std::time_t epoch_time_ = 0;
 };
 
 std::string format_duration(double elapsed);
