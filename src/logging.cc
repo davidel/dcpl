@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 
 #include "dcpl/assert.h"
 #include "dcpl/core_utils.h"
@@ -36,7 +37,7 @@ const std::array<const char*, 7> lev_to_name{
 std::once_flag init_flag;
 int next_sinkfn_id = 1;
 std::map<int, logger::sink_fn> sinks;
-std::recursive_mutex sinks_lock;
+std::shared_mutex sinks_lock;
 
 std::string_view get_level_id(int level, char lid[lid_size]) {
   static_assert(LEVEL_SPACE <= 10);
@@ -73,7 +74,7 @@ logger::~logger() {
     }
   };
 
-  std::lock_guard guard(sinks_lock);
+  std::shared_lock guard(sinks_lock);
 
   enum_lines(msg, log_fn);
 }
@@ -129,7 +130,7 @@ void logger::init() {
 }
 
 int logger::register_sink(sink_fn sinkfn) {
-  std::lock_guard guard(sinks_lock);
+  std::unique_lock guard(sinks_lock);
   int sid = next_sinkfn_id;
 
   sinks.emplace(sid, std::move(sinkfn));
@@ -139,7 +140,7 @@ int logger::register_sink(sink_fn sinkfn) {
 }
 
 void logger::unregister_sink(int sid) {
-  std::lock_guard guard(sinks_lock);
+  std::unique_lock guard(sinks_lock);
 
   sinks.erase(sid);
 }
