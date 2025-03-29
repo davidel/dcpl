@@ -27,6 +27,10 @@ std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) 
     char* arg = argv[i];
 
     if (*arg == '-') {
+      if (std::strcmp(arg, "--") == 0) {
+        break;
+      }
+
       arg = (arg[1] == '-') ? arg + 2 : arg + 1;
 
       if (std::strcmp(arg, name) == 0) {
