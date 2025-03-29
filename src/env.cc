@@ -26,12 +26,13 @@ std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) 
   for (int i = 1; i < *argc; ++i) {
     char* arg = argv[i];
 
-    if (*arg == '-') {
-      if (std::strcmp(arg, "--") == 0) {
+    if (std::strncmp(arg, "--", 2) == 0) {
+      arg += 2;
+
+      if (*arg == '\0') {
+        // Options end at -- ...
         break;
       }
-
-      arg = (arg[1] == '-') ? arg + 2 : arg + 1;
 
       if (std::strcmp(arg, name) == 0) {
         int num_args = 1;
@@ -42,7 +43,7 @@ std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) 
         } else {
           char* param = argv[i + 1];
 
-          if (*param != '-') {
+          if (std::strncmp(param, "--", 2) != 0) {
             param_str = param;
             ++num_args;
           } else {
