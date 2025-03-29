@@ -34,7 +34,6 @@ const std::array<const char*, 7> lev_to_name{
   "CRITICAL"
 };
 
-std::once_flag init_flag;
 int next_sinkfn_id = 1;
 bool stderr_log = true;
 std::map<int, logger::sink_fn> sinks;
@@ -84,8 +83,6 @@ int parse_level(std::string_view level_str) {
 }
 
 logger::~logger() {
-  std::call_once(init_flag, []() { init(); });
-
   std::string hdr = create_header();
   std::string msg = ss_.str();
   auto log_fn = [&](std::string_view msg) {
@@ -121,16 +118,19 @@ std::string logger::create_header() const {
   return ss.str();
 }
 
-void logger::init() {
-  std::optional<std::string> log_level = getenv("DCPL_LOG_LEVEL");
+void logger::setup(int* argc, char** argv) {
+  std::optional<std::string> log_level =
+      getenv_arg(argc, argv, "dcpl_log_level", "DCPL_LOG_LEVEL");
 
   if (log_level) {
     logger::current_level = parse_level(*log_level);
   }
 
-  stderr_log = getenv<int>("DCPL_STDERR_LOG", 1) != 0;
+  stderr_log = getenv_arg<int>(argc, argv, "dcpl_stderr_log",
+                               "DCPL_STDERR_LOG", 1) != 0;
 
-  std::optional<std::string> log_paths = getenv("DCPL_LOG_PATHS");
+  std::optional<std::string> log_paths =
+      getenv_arg(argc, argv, "dcpl_log_paths", "DCPL_LOG_PATHS");
 
   if (log_paths) {
     std::vector<std::string> paths = split_line<std::string>(*log_paths, ';');

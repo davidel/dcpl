@@ -11,15 +11,15 @@
 namespace dcpl {
 
 template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
-T getenv(const std::string& name, const T& defval) {
-  char* env = std::getenv(name.c_str());
+T getenv(const char* name, const T& defval) {
+  char* env = std::getenv(name);
 
   return (env != nullptr) ? to_number<T>(std::string_view(env)) : defval;
 }
 
 template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
-std::optional<T> getenv(const std::string& name) {
-  char* env = std::getenv(name.c_str());
+std::optional<T> getenv(const char* name) {
+  char* env = std::getenv(name);
 
   if (env == nullptr) {
     return std::nullopt;
@@ -28,9 +28,32 @@ std::optional<T> getenv(const std::string& name) {
   return to_number<T>(std::string_view(env));
 }
 
-std::string getenv(const std::string& name, std::string defval);
+std::string getenv(const char* name, std::string defval);
 
-std::optional<std::string> getenv(const std::string& name);
+std::optional<std::string> getenv(const char* name);
+
+std::optional<std::string> getenv_arg(int* argc, char** argv, const char* arg_name,
+                                      const char* env_name);
+
+template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
+T getenv_arg(int* argc, char** argv, const char* arg_name, const char* env_name,
+             const T& defval) {
+  std::optional<std::string> arg = getenv_arg(argc, argv, arg_name, env_name);
+
+  return arg ? to_number<T>(*arg) : defval;
+}
+
+template <typename T, typename std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
+std::optional<T> getenv_arg(int* argc, char** argv, const char* arg_name,
+                            const char* env_name) {
+  std::optional<std::string> arg = getenv_arg(argc, argv, arg_name, env_name);
+
+  if (!arg) {
+    return std::nullopt;
+  }
+
+  return to_number<T>(*arg);
+}
 
 }
 

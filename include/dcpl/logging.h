@@ -45,14 +45,14 @@ class logger : public noop {
     return *this;
   }
 
+  static void setup(int* argc, char** argv);
+
   static int register_sink(sink_fn sinkfn);
 
   static void unregister_sink(int sid);
 
  private:
   std::string create_header() const;
-
-  static void init();
 
   const char* path_ = nullptr;
   int lineno_ = -1;
