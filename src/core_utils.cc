@@ -5,6 +5,14 @@
 
 namespace dcpl {
 
+std::string to_upper(const char* data) {
+  return to_upper<std::string_view>(data);
+}
+
+std::string to_lower(const char* data) {
+  return to_lower<std::string_view>(data);
+}
+
 bool is_prime(std::size_t n) {
   if (n <= 3) {
     return true;

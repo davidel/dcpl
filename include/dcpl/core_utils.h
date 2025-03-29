@@ -135,6 +135,10 @@ std::string to_lower(const T& data) {
   return to_helper(data, [](auto c) { return std::tolower(c); });
 }
 
+std::string to_upper(const char* data);
+
+std::string to_lower(const char* data);
+
 template <typename T, typename S>
 std::span<T> reinterpret_span(std::span<S> source) {
   static_assert(sizeof(T) == sizeof(S), "Mismatching size");

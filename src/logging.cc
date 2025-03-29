@@ -119,18 +119,15 @@ std::string logger::create_header() const {
 }
 
 void logger::setup(int* argc, char** argv) {
-  std::optional<std::string> log_level =
-      getenv_arg(argc, argv, "dcpl_log_level", "DCPL_LOG_LEVEL");
+  std::optional<std::string> log_level = getenv_arg(argc, argv, "dcpl_log_level");
 
   if (log_level) {
     logger::current_level = parse_level(*log_level);
   }
 
-  stderr_log = getenv_arg<int>(argc, argv, "dcpl_stderr_log",
-                               "DCPL_STDERR_LOG", 1) != 0;
+  stderr_log = getenv_arg<int>(argc, argv, "dcpl_stderr_log", 1) != 0;
 
-  std::optional<std::string> log_paths =
-      getenv_arg(argc, argv, "dcpl_log_paths", "DCPL_LOG_PATHS");
+  std::optional<std::string> log_paths = getenv_arg(argc, argv, "dcpl_log_paths");
 
   if (log_paths) {
     std::vector<std::string> paths = split_line<std::string>(*log_paths, ';');
