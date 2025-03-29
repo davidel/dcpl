@@ -14,7 +14,7 @@
 #include "dcpl/cleanup.h"
 #include "dcpl/constants.h"
 #include "dcpl/core_utils.h"
-#include "dcpl/system.h"
+#include "dcpl/os.h"
 
 namespace dcpl {
 namespace {
@@ -336,7 +336,7 @@ file::mmap file::view(mmap_mode mode, fileoff_t offset, std::size_t size) {
     size = int_cast<std::size_t>(file_size - offset);
   }
 
-  std::size_t pgsize = page_size();
+  std::size_t pgsize = os::page_size();
   std::size_t align = static_cast<std::size_t>(offset % pgsize);
 
   return mmap(path_, fd_, mode, offset - align, size + align, align);

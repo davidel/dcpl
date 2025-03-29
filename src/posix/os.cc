@@ -1,6 +1,7 @@
 #include "dcpl/os.h"
 
 #include <time.h>
+#include <unistd.h>
 
 namespace dcpl {
 namespace os {
@@ -15,6 +16,10 @@ std::tm localtime(std::time_t epoc_time) {
   ::localtime_r(&epoc_time, &time_data);
 
   return time_data;
+}
+
+std::size_t page_size() {
+  return static_cast<std::size_t>(::getpagesize());
 }
 
 }
