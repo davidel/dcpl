@@ -62,19 +62,35 @@ class logger : public noop {
 
 }
 
+}
+
+namespace dcplog = dcpl::logging;
+
 #if defined(NDEBUG)
 #define DCPL_LOGDEBUG false
 #else // #if defined(NDEBUG)
 #define DCPL_LOGDEBUG true
 #endif // #if defined(NDEBUG)
 
-#define LOG(level) ((level) < dcpl::logging::logger::current_level) ?   \
-  dcpl::logging::noop() : dcpl::logging::logger(__FILE__, __LINE__, level)
+#define DCPL_LOG(level) ((level) < dcplog::logger::current_level) ?     \
+  dcplog::noop() : dcplog::logger(__FILE__, __LINE__, level)
 
-#define DLOG(level) (!DCPL_LOGDEBUG || (level) < dcpl::logging::logger::current_level) ? \
-  dcpl::logging::noop() : dcpl::logging::logger(__FILE__, __LINE__, level)
+#define DCPL_LOGD(level) (!DCPL_LOGDEBUG || (level) < dcplog::logger::current_level) ? \
+  dcplog::noop() : dcplog::logger(__FILE__, __LINE__, level)
 
-}
+#define DCPL_SLOG()  DCPL_LOG(dcplog::SPAM)
+#define DCPL_VLOG()  DCPL_LOG(dcplog::VERBOSE)
+#define DCPL_DLOG()  DCPL_LOG(dcplog::DEBUG)
+#define DCPL_ILOG()  DCPL_LOG(dcplog::INFO)
+#define DCPL_WLOG()  DCPL_LOG(dcplog::WARNING)
+#define DCPL_ELOG()  DCPL_LOG(dcplog::ERROR)
+#define DCPL_CLOG()  DCPL_LOG(dcplog::CRITICAL)
 
-namespace dcplog = dcpl::logging;
+#define DCPL_SLOGD()  DCPL_LOGD(dcplog::SPAM)
+#define DCPL_VLOGD()  DCPL_LOGD(dcplog::VERBOSE)
+#define DCPL_DLOGD()  DCPL_LOGD(dcplog::DEBUG)
+#define DCPL_ILOGD()  DCPL_LOGD(dcplog::INFO)
+#define DCPL_WLOGD()  DCPL_LOGD(dcplog::WARNING)
+#define DCPL_ELOGD()  DCPL_LOGD(dcplog::ERROR)
+#define DCPL_CLOGD()  DCPL_LOGD(dcplog::CRITICAL)
 
