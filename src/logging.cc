@@ -2,7 +2,6 @@
 
 #include <array>
 #include <cstdio>
-#include <cstring>
 #include <ctime>
 #include <fstream>
 #include <map>
@@ -14,6 +13,7 @@
 #include "dcpl/core_utils.h"
 #include "dcpl/env.h"
 #include "dcpl/format.h"
+#include "dcpl/fs.h"
 #include "dcpl/os.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -108,12 +108,11 @@ std::string logger::create_header() const {
   ss << get_level_id(level_, lid);
 
   auto now = nstime();
-  const char* fname = std::strrchr(path_, '/');
 
   ss << format_time("%Y%m%d %H:%M:%S", static_cast<std::time_t>(now / s2nano))
      << format(".%06ld", static_cast<long>((now % s2nano) / 1000))
      << " " << os::getpid() << " "
-     << (fname != nullptr ? fname + 1 : path_) << ":" << lineno_ << "] ";
+     << stdfs::path(path_).filename().native() << ":" << lineno_ << "] ";
 
   return ss.str();
 }
