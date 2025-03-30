@@ -64,5 +64,17 @@ std::string get_temp_path() {
   return stdfs::temp_directory_path() / fname;
 }
 
+std::string_view basename(std::string_view path) {
+  std::string_view::size_type pos = path.rfind(stdfs::path::preferred_separator);
+
+  return pos != std::string_view::npos ? path.substr(pos + 1) : path;
+}
+
+std::string_view dirname(std::string_view path) {
+  std::string_view::size_type pos = path.rfind(stdfs::path::preferred_separator);
+
+  return pos != std::string_view::npos ? path.substr(0, pos) : "";
+}
+
 }
 
