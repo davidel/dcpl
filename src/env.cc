@@ -24,7 +24,7 @@ std::optional<std::string> getenv(const char* name) {
 }
 
 std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) {
-  for (int i = 1; i < *argc; ++i) {
+  for (int i = 0; i < *argc; ++i) {
     const char* arg = argv[i];
 
     if (std::strncmp(arg, "--", 2) == 0) {
