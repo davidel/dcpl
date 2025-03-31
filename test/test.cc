@@ -683,7 +683,6 @@ TEST(BFloat16, Operations) {
 
 TEST(EnvArgs, API) {
   const char* argv[] = {
-    "binary",
     "--fparam", "17.21",
     "--iparam", "17",
     "--sparam", "DCPL here",
@@ -702,6 +701,11 @@ TEST(EnvArgs, API) {
   EXPECT_TRUE(iparam);
   EXPECT_EQ(*iparam, 17);
 
+  auto sparam = dcpl::getenv_arg(&argc, const_cast<char**>(argv), "sparam");
+
+  EXPECT_TRUE(sparam);
+  EXPECT_EQ(*sparam, "DCPL here");
+
   auto bparam = dcpl::getenv_arg<int>(&argc, const_cast<char**>(argv), "yes");
 
   EXPECT_TRUE(bparam);
@@ -711,6 +715,8 @@ TEST(EnvArgs, API) {
 
   EXPECT_TRUE(nbparam);
   EXPECT_EQ(*nbparam, 0);
+
+  EXPECT_EQ(argc, 0);
 }
 
 }

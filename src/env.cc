@@ -63,6 +63,7 @@ std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) 
         }
 
         *argc -= num_args;
+        argv[*argc] = nullptr;
 
         return std::move(param_str);
       }
