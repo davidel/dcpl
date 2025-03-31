@@ -358,13 +358,23 @@ std::string to_string(const S& s) {
 
 template <typename T, typename S>
 T from_chars(const S& s) {
-  T res{};
-  auto ccres = std::from_chars(s.data(), s.data() + s.size(), res);
+  if constexpr (std::is_same_v<T, bool>) {
+    int res{};
+    auto ccres = std::from_chars(s.data(), s.data() + s.size(), res);
 
-  DCPL_ASSERT(ccres.ec == std::errc() || ccres.ptr != (s.data() + s.size()))
-      << "Unable to convert: value=" << to_string(s);
+    DCPL_ASSERT(ccres.ec == std::errc() || ccres.ptr != (s.data() + s.size()))
+        << "Unable to convert: value=" << to_string(s);
 
-  return res;
+    return res != 0;
+  } else {
+    T res{};
+    auto ccres = std::from_chars(s.data(), s.data() + s.size(), res);
+
+    DCPL_ASSERT(ccres.ec == std::errc() || ccres.ptr != (s.data() + s.size()))
+        << "Unable to convert: value=" << to_string(s);
+
+    return res;
+  }
 }
 
 template <typename T, typename S>

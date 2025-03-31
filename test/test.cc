@@ -706,15 +706,15 @@ TEST(EnvArgs, API) {
   EXPECT_TRUE(sparam);
   EXPECT_EQ(*sparam, "DCPL here");
 
-  auto bparam = dcpl::getenv_arg<int>(&argc, const_cast<char**>(argv), "yes");
+  auto bparam = dcpl::getenv_arg<bool>(&argc, const_cast<char**>(argv), "yes");
 
   EXPECT_TRUE(bparam);
-  EXPECT_EQ(*bparam, 1);
+  EXPECT_TRUE(*bparam);
 
-  auto nbparam = dcpl::getenv_arg<int>(&argc, const_cast<char**>(argv), "foo");
+  auto nbparam = dcpl::getenv_arg<bool>(&argc, const_cast<char**>(argv), "foo");
 
   EXPECT_TRUE(nbparam);
-  EXPECT_EQ(*nbparam, 0);
+  EXPECT_FALSE(*nbparam);
 
   EXPECT_EQ(argc, 0);
 }
