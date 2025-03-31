@@ -45,7 +45,7 @@ std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) 
         if (i + 1 >= *argc) {
           param_str = negated ? "0" : "1";
         } else {
-          char* param = argv[i + 1];
+          const char* param = argv[i + 1];
 
           if (std::strncmp(param, "--", 2) != 0) {
             DCPL_ASSERT(!negated) << "Negation boolean flag " << arg
