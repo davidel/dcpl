@@ -122,7 +122,7 @@ void logger::setup(int* argc, char** argv) {
     current_level = parse_level(*log_level);
   }
 
-  stderr_log = getenv_arg<int>(argc, argv, "dcpl_stderr_log", 1) != 0;
+  stderr_log = getenv_arg<bool>(argc, argv, "dcpl_stderr_log", true);
 
   std::optional<std::string> log_paths = getenv_arg(argc, argv, "dcpl_log_paths");
 
