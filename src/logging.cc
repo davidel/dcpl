@@ -35,7 +35,6 @@ const std::array<const char*, 7> lev_to_name{
 };
 
 int next_sinkfn_id = 1;
-bool stderr_log = true;
 std::map<int, logger::sink_fn> sinks;
 std::shared_mutex sinks_lock;
 

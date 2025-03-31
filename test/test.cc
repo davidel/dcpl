@@ -22,6 +22,7 @@
 #include "dcpl/fs.h"
 #include "dcpl/ivector.h"
 #include "dcpl/json/json.h"
+#include "dcpl/logging.h"
 #include "dcpl/memory.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
@@ -717,6 +718,22 @@ TEST(EnvArgs, API) {
   EXPECT_FALSE(*nbparam);
 
   EXPECT_EQ(argc, 0);
+}
+
+TEST(Logging, Sink) {
+  dcpl::scoped_change sc(&dcplog::logger::stderr_log, false);
+  std::stringstream ss;
+  auto sink = [&](std::string_view hdr, std::string_view msg) {
+    ss << hdr << msg << "\n";
+  };
+
+  int sid = dcplog::logger::register_sink(std::move(sink));
+
+  DCPL_ILOG() << "DCPL LOGGING";
+
+  EXPECT_NE(ss.str().find("DCPL LOGGING"), std::string::npos);
+
+  dcplog::logger::unregister_sink(sid);
 }
 
 }

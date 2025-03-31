@@ -34,6 +34,24 @@ struct ref_pair {
 
 }
 
+template <typename T>
+class scoped_change {
+ public:
+  scoped_change(T* value, T scope_value) :
+      value_(value),
+      saved_(std::move(*value_)) {
+    *value_ = std::move(scope_value);
+  }
+
+  ~scoped_change() {
+    *value_ = std::move(saved_);
+  }
+
+ private:
+  T* value_ = nullptr;
+  T saved_;
+};
+
 template <typename T, typename F>
 std::vector<ref_pair<T>>
 map_sort(const T& data, const F& cmp) {
