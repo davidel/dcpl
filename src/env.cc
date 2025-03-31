@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "dcpl/assert.h"
 #include "dcpl/core_utils.h"
 
 namespace dcpl {
@@ -24,30 +25,36 @@ std::optional<std::string> getenv(const char* name) {
 
 std::optional<std::string> getenv_arg(int* argc, char** argv, const char* name) {
   for (int i = 1; i < *argc; ++i) {
-    char* arg = argv[i];
+    const char* arg = argv[i];
 
     if (std::strncmp(arg, "--", 2) == 0) {
-      arg += 2;
+      const char* arg_name = arg + 2;
 
-      if (*arg == '\0') {
+      if (*arg_name == '\0') {
         // Options end at -- ...
         break;
       }
 
-      if (std::strcmp(arg, name) == 0) {
+      bool negated = std::strncmp(arg_name, "no-", 3) == 0;
+      const char* effective_name = negated ? arg_name + 3 : arg_name;
+
+      if (std::strcmp(effective_name, name) == 0) {
         int num_args = 1;
         std::string param_str;
 
         if (i + 1 >= *argc) {
-          param_str = "1";
+          param_str = negated ? "0" : "1";
         } else {
           char* param = argv[i + 1];
 
           if (std::strncmp(param, "--", 2) != 0) {
+            DCPL_ASSERT(!negated) << "Negation boolean flag " << arg
+                                  << " cannot have a parameter (\"" << param << "\")";
+
             param_str = param;
             ++num_args;
           } else {
-            param_str = "1";
+            param_str = negated ? "0" : "1";
           }
         }
 

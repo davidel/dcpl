@@ -3,6 +3,7 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <numbers>
 #include <random>
 #include <sstream>
@@ -16,6 +17,7 @@
 #include "dcpl/bfloat16.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
+#include "dcpl/env.h"
 #include "dcpl/file.h"
 #include "dcpl/fs.h"
 #include "dcpl/ivector.h"
@@ -677,6 +679,38 @@ TEST(BFloat16, Operations) {
   vx += 1.0f;
 
   EXPECT_LT(std::fabs(mul_f_value + 1.0f - vx), mul_f_value * 0.01f);
+}
+
+TEST(EnvArgs, API) {
+  const char* argv[] = {
+    "binary",
+    "--fparam", "17.21",
+    "--iparam", "17",
+    "--sparam", "DCPL here",
+    "--yes",
+    "--no-foo"
+  };
+  int argc = std::size(argv);
+
+  auto fparam = dcpl::getenv_arg<double>(&argc, const_cast<char**>(argv), "fparam");
+
+  EXPECT_TRUE(fparam);
+  EXPECT_EQ(*fparam, 17.21);
+
+  auto iparam = dcpl::getenv_arg<int>(&argc, const_cast<char**>(argv), "iparam");
+
+  EXPECT_TRUE(iparam);
+  EXPECT_EQ(*iparam, 17);
+
+  auto bparam = dcpl::getenv_arg<int>(&argc, const_cast<char**>(argv), "yes");
+
+  EXPECT_TRUE(bparam);
+  EXPECT_EQ(*bparam, 1);
+
+  auto nbparam = dcpl::getenv_arg<int>(&argc, const_cast<char**>(argv), "foo");
+
+  EXPECT_TRUE(nbparam);
+  EXPECT_EQ(*nbparam, 0);
 }
 
 }
