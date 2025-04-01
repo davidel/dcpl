@@ -151,47 +151,18 @@ class threadpool {
  public:
   using thread_function = std::function<void()>;
 
-  explicit threadpool(std::size_t num_threads = 0) {
-    if (num_threads == 0) {
-      num_threads = std::thread::hardware_concurrency();
-    }
-    threads_.reserve(num_threads);
-    for (std::size_t i = 0; i < num_threads; ++i) {
-      threads_.push_back(std::make_unique<std::thread>(
-          [this]() {
-            run();
-          }));
-    }
-  }
+  explicit threadpool(std::size_t num_threads = 0);
 
-  ~threadpool() {
-    stop();
-    for (auto& thread : threads_) {
-      thread->join();
-    }
-  }
+  ~threadpool();
 
-  void stop() {
-    function_queue_.stop();
-  }
+  void stop();
 
-  void push_work(thread_function thread_fn) {
-    function_queue_.push(std::move(thread_fn));
-  }
+  void push_work(thread_function thread_fn);
 
   static threadpool* get();
 
  private:
-  void run() {
-    for (;;) {
-      std::optional<thread_function> thread_fn(function_queue_.pop());
-
-      if (!thread_fn) {
-        break;
-      }
-      (*thread_fn)();
-    }
-  }
+  void run();
 
   static threadpool* create_system_pool();
 
@@ -199,14 +170,7 @@ class threadpool {
   detail::queue<thread_function> function_queue_;
 };
 
-static inline std::size_t effective_num_threads(std::size_t num_threads,
-                                                std::size_t parallelism) {
-  if (num_threads == 0) {
-    num_threads = std::thread::hardware_concurrency();
-  }
-
-  return std::min(num_threads, parallelism);
-}
+std::size_t effective_num_threads(std::size_t num_threads, std::size_t parallelism);
 
 template <typename I, typename T, typename C>
 std::vector<T> map(const std::function<T (C&)>& fn, I start, I end,

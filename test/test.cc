@@ -15,6 +15,7 @@
 
 #include "dcpl/any.h"
 #include "dcpl/bfloat16.h"
+#include "dcpl/cleanup.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
 #include "dcpl/env.h"
@@ -29,6 +30,7 @@
 #include "dcpl/string_formatter.h"
 #include "dcpl/temp_file.h"
 #include "dcpl/temp_path.h"
+#include "dcpl/thread.h"
 #include "dcpl/threadpool.h"
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
@@ -435,6 +437,35 @@ TEST(ThreadPoolTest, API) {
   for (std::size_t i = 0; i < values.size(); ++i) {
     EXPECT_EQ(results[i], values[i] + ref);
   }
+}
+
+TEST(Thread, SetupCleanup) {
+  int setup = 0;
+  int cleanup = 0;
+  auto setup_fn = [&]() {
+    setup += 1;
+  };
+  auto cleanup_fn = [&]() {
+    cleanup += 1;
+  };
+
+  int sid = dcpl::thread::register_setup(setup_fn, cleanup_fn);
+  dcpl::cleanup clean([sid]() {
+    dcpl::thread::unregister_setup(sid);
+  });
+
+  int called = 0;
+  auto thread_fn = [&]() {
+    called += 1;
+  };
+
+  std::unique_ptr<std::thread> thr = dcpl::thread::create(thread_fn);
+
+  thr->join();
+
+  EXPECT_EQ(setup, 1);
+  EXPECT_EQ(cleanup, 1);
+  EXPECT_EQ(called, 1);
 }
 
 TEST(VarintTest, API) {
