@@ -36,7 +36,11 @@ void bootstrap(const std::function<void(void)>& thread_fn) {
   std::vector<prepare_ptr> cleanups;
   cleanup clean([&]() {
     for (auto rit = cleanups.rbegin(); rit != cleanups.rend(); ++rit) {
-      (*rit)->cleanup();
+      try {
+        (*rit)->cleanup();
+      } catch (const std::exception& ex) {
+        DCPL_ELOG() << "Error executing thread cleanup: " << ex.what();
+      }
     }
   });
 
