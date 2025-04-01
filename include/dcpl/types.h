@@ -2,6 +2,7 @@
 
 #include <climits>
 #include <cstdint>
+#include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <initializer_list>
@@ -82,9 +83,9 @@ using ssize_t = std::ptrdiff_t;
 
 using fileoff_t = std::streamoff;
 
-using nstime_t = std::int64_t;
-
 static constexpr std::size_t MAXINT_NBITS = bit_sizeof<maxint_t>();
+
+using ns_time = std::chrono::duration<std::int64_t, std::nano>;
 
 template <typename T>
 using ilist = std::initializer_list<T>;

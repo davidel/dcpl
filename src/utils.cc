@@ -49,23 +49,22 @@ std::span<const char> to_span(const char* str) {
   return { str, std::strlen(str) };
 }
 
-nstime_t nstime() {
+ns_time nstime() {
   std::chrono::time_point<std::chrono::high_resolution_clock>
       now = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<nstime_t, std::nano> epoch = now.time_since_epoch();
 
-  return epoch.count();
+  return { now.time_since_epoch() };
 }
 
 double time() {
   return from_nsecs(nstime());
 }
 
-void sleep_for(nstime_t nsecs) {
-  std::this_thread::sleep_for(duration(nsecs));
+void sleep_for(ns_time nsecs) {
+  std::this_thread::sleep_for(nsecs);
 }
 
-void sleep_until(nstime_t epoch_time) {
+void sleep_until(ns_time epoch_time) {
   std::this_thread::sleep_until(time_point(epoch_time));
 }
 

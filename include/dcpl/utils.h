@@ -378,33 +378,26 @@ std::span<const char> to_span(const std::string& str);
 
 std::span<const char> to_span(const char* str);
 
-inline std::chrono::duration<nstime_t, std::nano> duration(nstime_t nsecs) {
-  return std::chrono::duration<nstime_t, std::nano>(nsecs);
+inline std::chrono::time_point<std::chrono::high_resolution_clock, ns_time>
+time_point(ns_time nsecs) {
+  return std::chrono::time_point<std::chrono::high_resolution_clock, ns_time>(nsecs);
 }
 
-inline std::chrono::time_point<std::chrono::high_resolution_clock,
-                               std::chrono::duration<nstime_t, std::nano>>
-time_point(nstime_t nsecs) {
-  return std::chrono::time_point<
-    std::chrono::high_resolution_clock,
-    std::chrono::duration<nstime_t, std::nano>>(duration(nsecs));
-}
-
-nstime_t nstime();
+ns_time nstime();
 
 double time();
 
-inline nstime_t to_nsecs(double secs) {
-  return static_cast<nstime_t>(secs * 1e9);
+inline ns_time to_nsecs(double secs) {
+  return ns_time{ static_cast<ns_time::rep>(secs * 1e9) };
 }
 
-inline double from_nsecs(nstime_t nsecs) {
-  return static_cast<double>(nsecs) * 1e-9;
+inline double from_nsecs(ns_time nsecs) {
+  return static_cast<double>(nsecs.count()) * 1e-9;
 }
 
-void sleep_for(nstime_t nsecs);
+void sleep_for(ns_time nsecs);
 
-void sleep_until(nstime_t epoch_time);
+void sleep_until(ns_time epoch_time);
 
 }
 

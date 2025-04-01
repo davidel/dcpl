@@ -106,10 +106,10 @@ std::string logger::create_header() const {
 
   ss << get_level_id(level_, lid);
 
-  auto now = nstime();
+  ns_time now = nstime();
 
-  ss << format_time("%Y%m%d %H:%M:%S", static_cast<std::time_t>(now / s2nano))
-     << format(".%06ld", static_cast<long>((now % s2nano) / 1000))
+  ss << format_time("%Y%m%d %H:%M:%S", static_cast<std::time_t>(now.count() / s2nano))
+     << format(".%06ld", static_cast<long>((now.count() % s2nano) / 1000))
      << " " << os::getpid() << " " << basename(path_) << ":" << lineno_ << "] ";
 
   return ss.str();

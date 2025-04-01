@@ -55,7 +55,7 @@ class format_time {
   std::time_t epoch_time_ = 0;
 };
 
-std::string format_duration(double elapsed);
+std::string format_duration(ns_time elapsed);
 
 std::string format_bytes(umaxint_t size);
 

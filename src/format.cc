@@ -30,10 +30,10 @@ std::ostream& operator<<(std::ostream& stream, const format_time& fmt) {
   return stream;
 }
 
-std::string format_duration(double elapsed) {
-  DCPL_CHECK_GE(elapsed, 0.0) << "Duration must be non negative";
+std::string format_duration(ns_time elapsed) {
+  DCPL_CHECK_GE(elapsed.count(), 0) << "Duration must be non negative";
 
-  std::intmax_t usec_time = static_cast<std::intmax_t>(elapsed * 1e6);
+  std::intmax_t usec_time = static_cast<std::intmax_t>(elapsed.count() / 1000);
   std::imaxdiv_t dr;
 
   dr = std::imaxdiv(usec_time, 1000000);

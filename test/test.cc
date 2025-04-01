@@ -737,8 +737,8 @@ TEST(Logging, Sink) {
 }
 
 TEST(Thread, Sleep) {
-  constexpr dcpl::nstime_t sleep_time = 200 * 1000000;
-  dcpl::nstime_t time = dcpl::nstime();
+  constexpr dcpl::ns_time sleep_time{ 200 * 1000000 };
+  dcpl::ns_time time = dcpl::nstime();
 
   dcpl::sleep_for(sleep_time);
 
