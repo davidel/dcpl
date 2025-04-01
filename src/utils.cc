@@ -1,5 +1,7 @@
 #include "dcpl/utils.h"
 
+#include <thread>
+
 namespace dcpl {
 
 std::string_view read_line(std::string_view* data) {
@@ -49,6 +51,14 @@ std::span<const char> to_span(const char* str) {
 
 double time() {
   return nstime<double>() * 1e-9;
+}
+
+void sleep_for(double secs) {
+  std::this_thread::sleep_for(duration(secs));
+}
+
+void sleep_until(double epoch_time) {
+  std::this_thread::sleep_until(time_point(epoch_time));
 }
 
 }

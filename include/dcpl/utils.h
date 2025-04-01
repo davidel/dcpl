@@ -387,7 +387,25 @@ T nstime() {
   return epoch.count();
 }
 
+template <typename T = double>
+std::chrono::duration<T, std::nano> duration(double secs) {
+  return std::chrono::duration<T, std::nano>(static_cast<T>(secs * 1e9));
+}
+
+template <typename T = double>
+std::chrono::time_point<std::chrono::high_resolution_clock,
+                        std::chrono::duration<T, std::nano>>
+time_point(double secs) {
+  return std::chrono::time_point<
+    std::chrono::high_resolution_clock,
+    std::chrono::duration<T, std::nano>>(duration<T>(secs));
+}
+
 double time();
+
+void sleep_for(double secs);
+
+void sleep_until(double epoch_time);
 
 }
 
