@@ -22,6 +22,12 @@ namespace dcpl {
 namespace logging {
 namespace {
 
+struct context {
+  int next_sinkfn_id = 1;
+  std::map<int, logger::sink_fn> sinks;
+  std::shared_mutex sinks_lock;
+};
+
 static constexpr int lid_size = 1;
 
 const std::array<const char*, 7> lev_to_name{
@@ -34,9 +40,11 @@ const std::array<const char*, 7> lev_to_name{
   "CRITICAL"
 };
 
-int next_sinkfn_id = 1;
-std::map<int, logger::sink_fn> sinks;
-std::shared_mutex sinks_lock;
+context* get_context() {
+  static context* ctx = new context();
+
+  return ctx;
+}
 
 std::string_view get_level_id(int level, char lid[lid_size]) {
   static_assert(LEVEL_SPACE <= 10);
@@ -82,6 +90,7 @@ int parse_level(std::string_view level_str) {
 }
 
 logger::~logger() {
+  context* ctx = get_context();
   std::string hdr = create_header();
   std::string msg = ss_.str();
   auto log_fn = [&](std::string_view msg) {
@@ -89,12 +98,12 @@ logger::~logger() {
       std::cerr << hdr << msg << "\n";
     }
 
-    for (const auto& [sid, sinkfn] : sinks) {
+    for (const auto& [sid, sinkfn] : ctx->sinks) {
       sinkfn(hdr, msg);
     }
   };
 
-  std::shared_lock guard(sinks_lock);
+  std::shared_lock guard(ctx->sinks_lock);
 
   enum_lines(msg, log_fn);
 }
@@ -145,19 +154,21 @@ void logger::setup(int* argc, char** argv) {
 }
 
 int logger::register_sink(sink_fn sinkfn) {
-  std::unique_lock guard(sinks_lock);
-  int sid = next_sinkfn_id;
+  context* ctx = get_context();
+  std::unique_lock guard(ctx->sinks_lock);
+  int sid = ctx->next_sinkfn_id;
 
-  sinks.emplace(sid, std::move(sinkfn));
-  ++next_sinkfn_id;
+  ctx->sinks.emplace(sid, std::move(sinkfn));
+  ++ctx->next_sinkfn_id;
 
   return sid;
 }
 
 void logger::unregister_sink(int sid) {
-  std::unique_lock guard(sinks_lock);
+  context* ctx = get_context();
+  std::unique_lock guard(ctx->sinks_lock);
 
-  sinks.erase(sid);
+  ctx->sinks.erase(sid);
 }
 
 }
