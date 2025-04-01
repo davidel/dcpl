@@ -784,11 +784,13 @@ TEST(PeriodicTask, API) {
     counter += 1;
   };
 
-  dcpl::periodic_task task(task_fn, period);
+  {
+    dcpl::periodic_task task(task_fn, period);
 
-  dcpl::sleep_for(period * 5);
+    dcpl::sleep_for(period * 5);
 
-  task.stop();
+    task.stop();
+  }
 
   EXPECT_GT(counter, 3);
 }
