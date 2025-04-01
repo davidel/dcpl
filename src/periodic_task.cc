@@ -29,12 +29,14 @@ void periodic_task::stop() {
 
 void periodic_task::run() {
   for (;;) {
-    std::unique_lock guard(mtx_);
+    {
+      std::unique_lock guard(mtx_);
 
-    cond_.wait_for(guard, period_, [this]() { return stopped_; });
+      cond_.wait_for(guard, period_, [this]() { return stopped_; });
 
-    if (stopped_) {
-      break;
+      if (stopped_) {
+        break;
+      }
     }
 
     try {
