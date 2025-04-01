@@ -737,12 +737,12 @@ TEST(Logging, Sink) {
 }
 
 TEST(Thread, Sleep) {
-  constexpr double sleep_time = 0.2;
-  double time = dcpl::time();
+  constexpr dcpl::nstime_t sleep_time = 200 * 1000000;
+  dcpl::nstime_t time = dcpl::nstime();
 
   dcpl::sleep_for(sleep_time);
 
-  EXPECT_GE(dcpl::time(), time + sleep_time);
+  EXPECT_GE(dcpl::nstime(), time + sleep_time);
 }
 
 }

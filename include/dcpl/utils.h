@@ -378,34 +378,33 @@ std::span<const char> to_span(const std::string& str);
 
 std::span<const char> to_span(const char* str);
 
-template <typename T = std::int64_t>
-T nstime() {
-  std::chrono::time_point<std::chrono::high_resolution_clock>
-      now = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<T, std::nano> epoch = now.time_since_epoch();
-
-  return epoch.count();
+inline std::chrono::duration<nstime_t, std::nano> duration(nstime_t nsecs) {
+  return std::chrono::duration<nstime_t, std::nano>(nsecs);
 }
 
-template <typename T = double>
-std::chrono::duration<T, std::nano> duration(double secs) {
-  return std::chrono::duration<T, std::nano>(static_cast<T>(secs * 1e9));
-}
-
-template <typename T = double>
-std::chrono::time_point<std::chrono::high_resolution_clock,
-                        std::chrono::duration<T, std::nano>>
-time_point(double secs) {
+inline std::chrono::time_point<std::chrono::high_resolution_clock,
+                               std::chrono::duration<nstime_t, std::nano>>
+time_point(nstime_t nsecs) {
   return std::chrono::time_point<
     std::chrono::high_resolution_clock,
-    std::chrono::duration<T, std::nano>>(duration<T>(secs));
+    std::chrono::duration<nstime_t, std::nano>>(duration(nsecs));
 }
+
+nstime_t nstime();
 
 double time();
 
-void sleep_for(double secs);
+inline nstime_t to_nsecs(double secs) {
+  return static_cast<nstime_t>(secs * 1e9);
+}
 
-void sleep_until(double epoch_time);
+inline double from_nsecs(nstime_t nsecs) {
+  return static_cast<double>(nsecs) * 1e-9;
+}
+
+void sleep_for(nstime_t nsecs);
+
+void sleep_until(nstime_t epoch_time);
 
 }
 
