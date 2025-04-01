@@ -387,13 +387,9 @@ ns_time nstime();
 
 double time();
 
-inline ns_time to_nsecs(double secs) {
-  return ns_time{ static_cast<ns_time::rep>(secs * 1e9) };
-}
+ns_time to_nsecs(double secs);
 
-inline double from_nsecs(ns_time nsecs) {
-  return static_cast<double>(nsecs.count()) * 1e-9;
-}
+double from_nsecs(ns_time nsecs);
 
 void sleep_for(ns_time nsecs);
 

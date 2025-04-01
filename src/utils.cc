@@ -1,5 +1,6 @@
 #include "dcpl/utils.h"
 
+#include <cinttypes>
 #include <thread>
 
 namespace dcpl {
@@ -58,6 +59,16 @@ ns_time nstime() {
 
 double time() {
   return from_nsecs(nstime());
+}
+
+ns_time to_nsecs(double secs) {
+  return ns_time{ static_cast<ns_time::rep>(secs * 1e9) };
+}
+
+double from_nsecs(ns_time nsecs) {
+  std::imaxdiv_t dres = std::imaxdiv(static_cast<std::intmax_t>(nsecs.count()), 10000);
+
+  return static_cast<double>(dres.quot) * 1e-5 + static_cast<double>(dres.rem) * 1e-9;
 }
 
 void sleep_for(ns_time nsecs) {
