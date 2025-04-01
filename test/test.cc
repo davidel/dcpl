@@ -25,6 +25,7 @@
 #include "dcpl/json/json.h"
 #include "dcpl/logging.h"
 #include "dcpl/memory.h"
+#include "dcpl/periodic_task.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
@@ -774,6 +775,22 @@ TEST(Thread, Sleep) {
   dcpl::sleep_for(sleep_time);
 
   EXPECT_GE(dcpl::nstime(), time + sleep_time);
+}
+
+TEST(PeriodicTask, API) {
+  constexpr dcpl::ns_time period(50 * 1000000);
+  int counter = 0;
+  auto task_fn = [&]() {
+    counter += 1;
+  };
+
+  dcpl::periodic_task task(task_fn, period);
+
+  dcpl::sleep_for(period * 5);
+
+  task.stop();
+
+  EXPECT_GT(counter, 3);
 }
 
 }
