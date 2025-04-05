@@ -270,8 +270,8 @@ class vector {
       vect_(new impl_vector(size, value)) {
   }
 
-  const impl_vector* get() const {
-    return vect_.get();
+  const impl_vector& get() const {
+    return *vect_;
   }
 
   std::span<const T> span() const {

@@ -26,6 +26,7 @@
 #include "dcpl/logging.h"
 #include "dcpl/memory.h"
 #include "dcpl/periodic_task.h"
+#include "dcpl/rcu/rcu.h"
 #include "dcpl/rcu/unordered_map.h"
 #include "dcpl/rcu/vector.h"
 #include "dcpl/stdns_override.h"
@@ -795,6 +796,33 @@ TEST(PeriodicTask, API) {
   }
 
   EXPECT_GT(counter, 3);
+}
+
+TEST(RcuVector, Concurrency) {
+  constexpr dcpl::ns_time tick(1000000);
+  dcpl::rcu::vector<int> vect;
+
+  auto thread_fn = [&]() {
+    for (int i = 0; i < 200; ++i) {
+      dcpl::rcu::context ctx;
+
+      vect.push_back(i);
+      dcpl::sleep_for(tick + dcpl::ns_time(10000));
+    }
+  };
+
+  std::unique_ptr<std::thread> tick_thread = dcpl::thread::create(thread_fn);
+
+  for (int i = 0; i < 200; ++i) {
+    dcpl::rcu::context ctx;
+    const auto& ivect = vect.get();
+    std::size_t size = ivect.size();
+
+    for (std::size_t n = 0; n < size; ++n) {
+      EXPECT_EQ(n, static_cast<std::size_t>(ivect[n]));
+    }
+  }
+  tick_thread->join();
 }
 
 }

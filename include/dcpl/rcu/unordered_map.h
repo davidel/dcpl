@@ -457,8 +457,8 @@ class unordered_map {
       umap_(new impl_unordered_map(init_size)) {
   }
 
-  const impl_unordered_map* get() const {
-    return umap_.get();
+  const impl_unordered_map& get() const {
+    return *umap_;
   }
 
   size_type size() const {
