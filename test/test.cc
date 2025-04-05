@@ -26,6 +26,8 @@
 #include "dcpl/logging.h"
 #include "dcpl/memory.h"
 #include "dcpl/periodic_task.h"
+#include "dcpl/rcu/unordered_map.h"
+#include "dcpl/rcu/vector.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
