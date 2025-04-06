@@ -4,8 +4,7 @@
 #include <cstddef>
 #include <initializer_list>
 
-namespace dcpl {
-namespace consts {
+namespace dcpl::consts {
 
 static constexpr std::size_t all = static_cast<std::size_t>(-1);
 static constexpr std::size_t invalid_index = static_cast<std::size_t>(-1);
@@ -27,8 +26,6 @@ constexpr T load(const std::initializer_list<S> values) {
   }
 
   return value;
-}
-
 }
 
 }
