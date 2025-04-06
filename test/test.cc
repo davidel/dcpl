@@ -827,10 +827,11 @@ TEST(RcuVector, Concurrency) {
 
 TEST(RcuUnorderedMap, Concurrency) {
   constexpr dcpl::ns_time tick(1000000);
+  constexpr int num_inserts = 200;
   dcpl::rcu::unordered_map<int, int> umap;
 
   auto thread_fn = [&]() {
-    for (int i = 0; i < 200; ++i) {
+    for (int i = 0; i < num_inserts; ++i) {
       dcpl::rcu::context ctx;
 
       umap.emplace(i, i + 1);
@@ -849,6 +850,10 @@ TEST(RcuUnorderedMap, Concurrency) {
     }
   }
   tick_thread->join();
+
+  for (int i = 0; i < num_inserts; ++i) {
+    EXPECT_EQ(umap.count(i), 1);
+  }
 }
 
 }

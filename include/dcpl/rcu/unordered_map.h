@@ -153,6 +153,12 @@ class unordered_map {
     return { this, kv, index };
   }
 
+  size_type count(const key_type& key) const {
+    difference_type index = find_key(key);
+
+    return index >= 0 ? 1 : 0;
+  }
+
   const mapped_type& at(const key_type& key) const {
     difference_type index = find_key(key);
 
@@ -513,6 +519,10 @@ class unordered_map {
     return umap_->find(key);
   }
 
+  size_type count(const key_type& key) const {
+    return umap_->count(key);
+  }
+
   const mapped_type& at(const key_type& key) const {
     return umap_->at(key);
   }
@@ -531,6 +541,10 @@ class unordered_map {
 
   iterator erase(const iterator& it) {
     return umap_->erase(it);
+  }
+
+  void swap(unordered_map& other) {
+    umap_.swap(other.umap_);
   }
 
  private:
