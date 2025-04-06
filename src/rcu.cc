@@ -69,7 +69,7 @@ rcu_context* initialize() {
 
   rcu_context* ctx = new rcu_context();
 
-  ns_time purge_period(getenv<std::int64_t>("RCU_PURGE_PERIOD", 1000) * 1000000);
+  ns_time purge_period = msecs(getenv<std::int64_t>("RCU_PURGE_PERIOD", 1000));
 
   ctx->purger = std::make_unique<periodic_task>(purge, purge_period);
 
@@ -211,7 +211,7 @@ void enqueue_callback(void* data, void (*fn)(void*)) {
 }
 
 void synchronize() {
-  constexpr ns_time period(250 * 1000000);
+  const ns_time period = msecs(250);
 
   std::thread::id this_id = std::this_thread::get_id();
   rcu_context* ctx = get_context();
