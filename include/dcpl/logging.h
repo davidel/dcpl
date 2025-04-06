@@ -6,8 +6,7 @@
 #include <string>
 #include <string_view>
 
-namespace dcpl {
-namespace logging {
+namespace dcpl::logging {
 
 constexpr int LEVEL_SPACE = 10;
 
@@ -60,8 +59,6 @@ class logger : public noop {
   int level_ = SPAM;
   std::stringstream ss_;
 };
-
-}
 
 }
 
