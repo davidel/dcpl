@@ -108,7 +108,7 @@ gen_t get_oldest_generation(rcu_context* ctx, rcu_tls* ctls) {
   gen_t mingen = std::numeric_limits<gen_t>::max();
 
   for (auto rtls : ctx->threads_tls) {
-    if (ctls == nullptr || ctls != rtls) {
+    if (ctls != rtls) {
       mingen = std::min(mingen, rtls->generation);
     }
   }
