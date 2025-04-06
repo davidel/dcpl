@@ -825,6 +825,32 @@ TEST(RcuVector, Concurrency) {
   tick_thread->join();
 }
 
+TEST(RcuUnorderedMap, Concurrency) {
+  constexpr dcpl::ns_time tick(1000000);
+  dcpl::rcu::unordered_map<int, int> umap;
+
+  auto thread_fn = [&]() {
+    for (int i = 0; i < 200; ++i) {
+      dcpl::rcu::context ctx;
+
+      umap.emplace(i, i + 1);
+      dcpl::sleep_for(tick + dcpl::ns_time(10000));
+    }
+  };
+
+  std::unique_ptr<std::thread> tick_thread = dcpl::thread::create(thread_fn);
+
+  for (int i = 0; i < 200; ++i) {
+    dcpl::rcu::context ctx;
+    const auto& iumap = umap.get();
+
+    for (auto& it : iumap) {
+      EXPECT_EQ(it.first + 1, it.second);
+    }
+  }
+  tick_thread->join();
+}
+
 }
 
 int main(int argc, char **argv) {

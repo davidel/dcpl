@@ -24,7 +24,7 @@ struct asserter : public base_asserter {
 
   asserter(asserter&& ref) = default;
 
-  ~asserter() noexcept(false) {
+  [[noreturn]] ~asserter() noexcept(false) {
     throw X(error_stream.str());
   }
 

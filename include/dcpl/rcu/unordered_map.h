@@ -62,8 +62,10 @@ class unordered_map {
     iterator_impl(const iterator_impl&) = default;
     iterator_impl(iterator_impl&&) = default;
     iterator_impl& operator=(const iterator_impl&) = default;
-    bool operator==(const iterator_impl&) const = default;
-    bool operator!=(const iterator_impl&) const = default;
+
+    bool operator==(const iterator_impl& rhs) const {
+      return index_ == rhs.index_;
+    }
 
     iterator_impl& operator++() {
       if (index_ != end_index) [[likely]] {
@@ -131,11 +133,11 @@ class unordered_map {
     difference_type index = -1;
     value_type* kv = next_value(&index);
 
-    return { this, kv, index };
+    return { const_cast<unordered_map*>(this), kv, index };
   }
 
   const_iterator end() const {
-    return { this, nullptr, end_index };
+    return { const_cast<unordered_map*>(this), nullptr, end_index };
   }
 
   const_iterator find(const key_type& key) const {
