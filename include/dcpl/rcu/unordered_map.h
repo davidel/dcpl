@@ -431,6 +431,8 @@ class unordered_map {
 // accessing data within a section where the rcu::context is held.
 // This unordered_map implementation is effectively a flat_map, consisting of an
 // array of pointers to the value_type objects (std::pair<Key, T>).
+// Readers should grab an rcu::context in scope, and then use the impl_unordered_map
+// reference returned by the get() API.
 template <typename Key, typename T,
           typename Hash = std::hash<Key>,
           typename KeyEqual = std::equal_to<Key>>
