@@ -70,7 +70,6 @@ rcu_context* initialize() {
   rcu_context* ctx = new rcu_context();
 
   ns_time purge_period(getenv<std::int64_t>("RCU_PURGE_PERIOD", 1000) * 1000000);
-  std::unique_ptr<periodic_task> purger;
 
   ctx->purger = std::make_unique<periodic_task>(purge, purge_period);
 
