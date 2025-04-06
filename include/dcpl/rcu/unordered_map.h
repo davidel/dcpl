@@ -437,7 +437,7 @@ class unordered_map {
 // accessing data within a section where the rcu::context is held.
 // This unordered_map implementation is effectively a flat_map, consisting of an
 // array of pointers to the value_type objects (std::pair<Key, T>).
-// Readers should grab an rcu::context in scope, and then use the impl_unordered_map
+// Readers should grab an rcu::context in scope, and then use the map_type
 // reference returned by the get() API.
 template <typename Key, typename T,
           typename Hash = std::hash<Key>,
@@ -447,27 +447,27 @@ class unordered_map {
   static constexpr double max_load = 0.75;
 
  public:
-  using impl_unordered_map = impl::unordered_map<Key, T, Hash, KeyEqual>;
+  using map_type = impl::unordered_map<Key, T, Hash, KeyEqual>;
 
-  using key_type = impl_unordered_map::key_type;
-  using mapped_type = impl_unordered_map::mapped_type;
-  using hasher = impl_unordered_map::hasher;
-  using key_equal = impl_unordered_map::key_equal;
-  using value_type = impl_unordered_map::value_type;
-  using size_type = impl_unordered_map::size_type;
-  using difference_type = impl_unordered_map::difference_type;
-  using reference = impl_unordered_map::reference;
-  using const_reference = impl_unordered_map::const_reference;
-  using pointer = impl_unordered_map::pointer;
-  using const_pointer = impl_unordered_map::const_pointer;
-  using iterator = impl_unordered_map::iterator;
-  using const_iterator = impl_unordered_map::const_iterator;
+  using key_type = map_type::key_type;
+  using mapped_type = map_type::mapped_type;
+  using hasher = map_type::hasher;
+  using key_equal = map_type::key_equal;
+  using value_type = map_type::value_type;
+  using size_type = map_type::size_type;
+  using difference_type = map_type::difference_type;
+  using reference = map_type::reference;
+  using const_reference = map_type::const_reference;
+  using pointer = map_type::pointer;
+  using const_pointer = map_type::const_pointer;
+  using iterator = map_type::iterator;
+  using const_iterator = map_type::const_iterator;
 
   unordered_map() :
-      umap_(new impl_unordered_map(init_size)) {
+      umap_(new map_type(init_size)) {
   }
 
-  const impl_unordered_map& get() const {
+  const map_type& get() const {
     return *umap_;
   }
 
@@ -480,7 +480,7 @@ class unordered_map {
   }
 
   void clear() {
-    unique_ptr<impl_unordered_map> umap(new impl_unordered_map(umap_->capacity()));
+    unique_ptr<map_type> umap(new map_type(umap_->capacity()));
 
     umap_.swap(umap);
   }
@@ -488,8 +488,8 @@ class unordered_map {
   template <typename U>
   std::pair<iterator, bool> insert(U&& value) {
     if (umap_->load() >= max_load) {
-      unique_ptr<impl_unordered_map>
-          umap(new impl_unordered_map(2 * umap_->capacity(), umap_->begin(),
+      unique_ptr<map_type>
+          umap(new map_type(2 * umap_->capacity(), umap_->begin(),
                                       umap_->end()));
 
       umap_.swap(umap);
@@ -548,7 +548,7 @@ class unordered_map {
   }
 
  private:
-  unique_ptr<impl_unordered_map> umap_;
+  unique_ptr<map_type> umap_;
 };
 
 }

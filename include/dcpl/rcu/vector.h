@@ -208,36 +208,36 @@ class vector : private allocator<T> {
 // In RCU there is a single writer (eventually serializing among themselves with
 // external locks) and multiple readers which do not serialize at all, except for
 // accessing data within a section where the rcu::context is held.
-// A vector (a core impl_vector that is) can never shrink, and its data is deleted
+// A vector (a core vector_type that is) can never shrink, and its data is deleted
 // (in an RCU fashion) only when a new version of itself is created.
 // Operations which lead to changing existing data (like insert() at positions
 // different from end()) will trigger the generation of a new version.
 // The stored data is always copied when a new version is generated (data cannot be
-// moved as it needs to remain valid for readers holding a given impl_vector reference).
+// moved as it needs to remain valid for readers holding a given vector_type reference).
 // Writers should use the main vector API to modify the vector content, while
-// readers should either get an impl_vector insteance using the get() API, and use
+// readers should either get an vector_type insteance using the get() API, and use
 // that to access the data, or use the span() API to extract the current data range.
 // The data, once writtten/stored, cannot be modified, hence there are no non-const
 // data accessors and iterators.
-// Note that when using the impl_vector interface, the size of the vector can
+// Note that when using the vector_type interface, the size of the vector can
 // increase (never decrease) among calls, so patterns like the following should br
 // avoided:
 //
 //   dcpl::rcu::context ctx;
-//   T* data = alloc(impl_vector->size());
+//   T* data = alloc(vector_type->size());
 //
-//   for (i = 0; i < impl_vector->size(); ++i) {
-//     data[i] = func((*impl_vector)[i]); // data[] overflow is size() increases ...
+//   for (i = 0; i < vector_type->size(); ++i) {
+//     data[i] = func((*vector_type)[i]); // data[] overflow is size() increases ...
 //   }
 //
 // While the following is OK:
 //
 //   dcpl::rcu::context ctx;
-//   size_type size = impl_vector->size();
+//   size_type size = vector_type->size();
 //   T* data = alloc(size);
 //
 //   for (i = 0; i < size(); ++i) {
-//     data[i] = func((*impl_vector)[i]);
+//     data[i] = func((*vector_type)[i]);
 //   }
 //
 template <typename T>
@@ -246,36 +246,36 @@ class vector {
   static constexpr double max_waste = 0.5;
 
  public:
-  using impl_vector = impl::vector<T>;
+  using vector_type = impl::vector<T>;
 
-  using value_type = impl_vector::value_type;
-  using size_type = impl_vector::size_type;
-  using difference_type = impl_vector::difference_type;
-  using reference = impl_vector::reference;
-  using const_reference = impl_vector::const_reference;
-  using pointer = impl_vector::pointer;
-  using const_pointer = impl_vector::const_pointer;
-  using iterator = impl_vector::iterator;
-  using const_iterator = impl_vector::const_iterator;
+  using value_type = vector_type::value_type;
+  using size_type = vector_type::size_type;
+  using difference_type = vector_type::difference_type;
+  using reference = vector_type::reference;
+  using const_reference = vector_type::const_reference;
+  using pointer = vector_type::pointer;
+  using const_pointer = vector_type::const_pointer;
+  using iterator = vector_type::iterator;
+  using const_iterator = vector_type::const_iterator;
 
   vector() :
-      vect_(new impl_vector(init_size)) {
+      vect_(new vector_type(init_size)) {
   }
 
   explicit vector(size_type size) :
-      vect_(new impl_vector(size, T())) {
+      vect_(new vector_type(size, T())) {
   }
 
   vector(size_type size, const T& value) :
-      vect_(new impl_vector(size, value)) {
+      vect_(new vector_type(size, value)) {
   }
 
-  const impl_vector& get() const {
+  const vector_type& get() const {
     return *vect_;
   }
 
   std::span<const T> span() const {
-    const impl_vector* vect = get();
+    const vector_type* vect = get();
 
     return { vect->data(), vect->size() };
   }
@@ -309,7 +309,7 @@ class vector {
   }
 
   // The begin()/end() iterators can be safely used only on the writer side (with
-  // proper serialization), the the underlying impl_vector instance can change
+  // proper serialization), the the underlying vector_type instance can change
   // during the iteration.
   const_iterator begin() const {
     return vect_->begin();
@@ -321,8 +321,8 @@ class vector {
 
   void reserve(size_type capacity) {
     if (capacity > vect_->capacity()) {
-      unique_ptr<impl_vector>
-          new_vect(new impl_vector(capacity, vect_->data(),
+      unique_ptr<vector_type>
+          new_vect(new vector_type(capacity, vect_->data(),
                                    vect_->data() + vect_->size()));
 
       vect_.swap(new_vect);
@@ -330,7 +330,7 @@ class vector {
   }
 
   void clear() {
-    unique_ptr<impl_vector> new_vect(new impl_vector(vect_->capacity()));
+    unique_ptr<vector_type> new_vect(new vector_type(vect_->capacity()));
 
     vect_.swap(new_vect);
   }
@@ -340,8 +340,8 @@ class vector {
       vect_->push_back(value);
     } else {
       size_type new_size = 2 * vect_->size() + 1;
-      unique_ptr<impl_vector>
-          new_vect(new impl_vector(new_size, vect_->data(),
+      unique_ptr<vector_type>
+          new_vect(new vector_type(new_size, vect_->data(),
                                    vect_->data() + vect_->size()));
 
       new_vect->push_back(value);
@@ -354,8 +354,8 @@ class vector {
       vect_->push_back(value);
     } else {
       size_type new_size = 2 * vect_->size() + 1;
-      unique_ptr<impl_vector>
-          new_vect(new impl_vector(new_size, vect_->data(),
+      unique_ptr<vector_type>
+          new_vect(new vector_type(new_size, vect_->data(),
                                    vect_->data() + vect_->size()));
 
       new_vect->push_back(value);
@@ -382,8 +382,8 @@ class vector {
         vpos == vect_->size()) {
       vect_->insert(base, top);
     } else {
-      unique_ptr<impl_vector>
-          new_vect(new impl_vector(vect_->capacity() + count, vect_->data(),
+      unique_ptr<vector_type>
+          new_vect(new vector_type(vect_->capacity() + count, vect_->data(),
                                    vect_->data() + vpos));
 
       new_vect->insert(base, top);
@@ -402,8 +402,8 @@ class vector {
 
       DCPL_ASSERT(size > 0);
 
-      unique_ptr<impl_vector>
-          new_vect(new impl_vector(vect_->capacity(),
+      unique_ptr<vector_type>
+          new_vect(new vector_type(vect_->capacity(),
                                    vect_->data(), vect_->data() + size - 1));
 
       vect_.swap(new_vect);
@@ -416,8 +416,8 @@ class vector {
       vect_->resize(size, value);
     } else {
       size_type copy_size = std::min(size, vect_->size());
-      unique_ptr<impl_vector>
-          new_vect(new impl_vector(size, vect_->data(), vect_->data() + copy_size));
+      unique_ptr<vector_type>
+          new_vect(new vector_type(size, vect_->data(), vect_->data() + copy_size));
 
       if (size > copy_size) {
         new_vect->resize(size, value);
@@ -431,7 +431,7 @@ class vector {
   }
 
  private:
-  unique_ptr<impl_vector> vect_;
+  unique_ptr<vector_type> vect_;
 };
 
 }
