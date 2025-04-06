@@ -6,8 +6,7 @@
 #include <cstddef>
 #include <ctime>
 
-namespace dcpl {
-namespace os {
+namespace dcpl::os {
 
 using pid_t = ::pid_t;
 
@@ -18,6 +17,3 @@ std::tm localtime(std::time_t epoc_time);
 std::size_t page_size();
 
 }
-
-}
-
