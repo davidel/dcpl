@@ -233,7 +233,7 @@ void synchronize() {
     sleep_for(period);
   }
 
-  DCPL_VLOG() << "Eciting RCU synchronize for thread " << this_id;
+  DCPL_VLOG() << "Exiting RCU synchronize for thread " << this_id;
 }
 
 }

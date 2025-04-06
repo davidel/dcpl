@@ -772,7 +772,7 @@ TEST(Logging, Sink) {
 }
 
 TEST(Thread, Sleep) {
-  constexpr dcpl::ns_time sleep_time(200 * 1000000);
+  const dcpl::ns_time sleep_time = dcpl::msecs(200);
   dcpl::ns_time time = dcpl::nstime();
 
   dcpl::sleep_for(sleep_time);
@@ -781,7 +781,7 @@ TEST(Thread, Sleep) {
 }
 
 TEST(PeriodicTask, API) {
-  constexpr dcpl::ns_time period(50 * 1000000);
+  const dcpl::ns_time period = dcpl::msecs(50);
   int counter = 0;
   auto task_fn = [&]() {
     counter += 1;
@@ -799,7 +799,7 @@ TEST(PeriodicTask, API) {
 }
 
 TEST(RcuVector, Concurrency) {
-  constexpr dcpl::ns_time tick(1000000);
+  const dcpl::ns_time tick = dcpl::msecs(1);
   dcpl::rcu::vector<int> vect;
 
   auto thread_fn = [&]() {
@@ -807,7 +807,7 @@ TEST(RcuVector, Concurrency) {
       dcpl::rcu::context ctx;
 
       vect.push_back(i);
-      dcpl::sleep_for(tick + dcpl::ns_time(10000));
+      dcpl::sleep_for(tick + dcpl::usecs(10));
     }
   };
 
@@ -826,8 +826,8 @@ TEST(RcuVector, Concurrency) {
 }
 
 TEST(RcuUnorderedMap, Concurrency) {
-  constexpr dcpl::ns_time tick(1000000);
-  constexpr int num_inserts = 200;
+  const dcpl::ns_time tick = dcpl::msecs(1);
+  const int num_inserts = 200;
   dcpl::rcu::unordered_map<int, int> umap;
 
   auto thread_fn = [&]() {
@@ -835,7 +835,7 @@ TEST(RcuUnorderedMap, Concurrency) {
       dcpl::rcu::context ctx;
 
       umap.emplace(i, i + 1);
-      dcpl::sleep_for(tick + dcpl::ns_time(10000));
+      dcpl::sleep_for(tick + dcpl::usecs(10));
     }
   };
 

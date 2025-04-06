@@ -383,6 +383,18 @@ time_point(ns_time nsecs) {
   return std::chrono::time_point<std::chrono::high_resolution_clock, ns_time>(nsecs);
 }
 
+inline ns_time secs(ns_time::rep value) {
+  return ns_time{ value * 1000000000 };
+}
+
+inline ns_time msecs(ns_time::rep value) {
+  return ns_time{ value * 1000000 };
+}
+
+inline ns_time usecs(ns_time::rep value) {
+  return ns_time{ value * 1000 };
+}
+
 ns_time nstime();
 
 double time();
