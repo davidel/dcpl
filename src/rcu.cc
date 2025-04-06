@@ -123,6 +123,7 @@ gen_t get_oldest_generation(rcu_context* ctx, const std::thread::id* excl_id) {
 
 void purge() {
   rcu_context* ctx = get_context();
+  rcu_tls* ctls = get_tls();
   gen_t curgen = ctx->generation.fetch_add(1);
 
   DCPL_SLOG() << "Running RCU purge at " << curgen;
@@ -161,8 +162,6 @@ void purge() {
   // When the RCU callbacks are called above, they might issue more callbacks,
   // which will be queued in the purger thread. So here we flush them for the next
   // round. We already hold the RCU context lock, taken by the above guard.
-  rcu_tls* ctls = get_tls();
-
   if (!ctls->callbacks.empty()) {
     ctx->callbacks.emplace_back(ctx->generation.load() , std::move(ctls->callbacks));
     ctls->callbacks.clear();
