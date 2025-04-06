@@ -40,14 +40,9 @@ struct gen_callbacks {
 };
 
 struct rcu_tls {
-  rcu_tls() :
-      id(std::this_thread::get_id()) {
-  }
-
   std::vector<callback> callbacks;
   gen_t generation = std::numeric_limits<gen_t>::max();
   int scope_count = 0;
-  std::thread::id id;
 };
 
 struct rcu_context {
@@ -108,12 +103,12 @@ rcu_tls* get_tls() {
   return tls.get();
 }
 
-gen_t get_oldest_generation(rcu_context* ctx, const std::thread::id* excl_id) {
+gen_t get_oldest_generation(rcu_context* ctx, rcu_tls* ctls) {
   // Must be called with ctx->mtx locked.
   gen_t mingen = std::numeric_limits<gen_t>::max();
 
   for (auto rtls : ctx->threads_tls) {
-    if (excl_id == nullptr || *excl_id != rtls->id) {
+    if (ctls == nullptr || ctls != rtls) {
       mingen = std::min(mingen, rtls->generation);
     }
   }
@@ -129,7 +124,7 @@ void purge() {
   DCPL_SLOG() << "Running RCU purge at " << curgen;
 
   std::lock_guard guard(ctx->mtx);
-  gen_t mingen = get_oldest_generation(ctx, /*excl_id=*/ nullptr);
+  gen_t mingen = get_oldest_generation(ctx, ctls);
 
   DCPL_SLOG() << "Oldest thread RCU generation is " << mingen;
 
@@ -215,6 +210,7 @@ void synchronize() {
 
   std::thread::id this_id = std::this_thread::get_id();
   rcu_context* ctx = get_context();
+  rcu_tls* ctls = get_tls();
   gen_t curgen = ctx->generation.load();
 
   DCPL_VLOG() << "Entering RCU synchronize for thread " << this_id;
@@ -222,7 +218,7 @@ void synchronize() {
   for (;;) {
     {
       std::lock_guard guard(ctx->mtx);
-      gen_t mingen = get_oldest_generation(ctx, &this_id);
+      gen_t mingen = get_oldest_generation(ctx, ctls);
 
       if (mingen > curgen) {
         break;
