@@ -5,8 +5,7 @@
 #include <thread>
 #include <utility>
 
-namespace dcpl {
-namespace thread {
+namespace dcpl::thread {
 
 using setup_fn = std::function<void(void)>;
 using cleanup_fn = std::function<void(void)>;
@@ -18,8 +17,6 @@ void unregister_setup(int sid);
 std::function<void(void)> wrap_fn(std::function<void(void)> thread_fn);
 
 std::unique_ptr<std::thread> create(std::function<void(void)> fn);
-
-}
 
 }
 
