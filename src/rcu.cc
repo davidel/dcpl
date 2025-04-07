@@ -163,11 +163,8 @@ void purge() {
   }
 }
 
-}
-
-void flush_callbacks() {
+void flush_callbacks(rcu_tls* ctls) {
   rcu_context* ctx = get_context();
-  rcu_tls* ctls = get_tls();
 
   if (!ctls->callbacks.empty()) {
     std::lock_guard guard(ctx->mtx);
@@ -175,6 +172,12 @@ void flush_callbacks() {
     ctx->callbacks.emplace_back(ctx->generation.load() , std::move(ctls->callbacks));
     ctls->callbacks.clear();
   }
+}
+
+}
+
+void flush_callbacks() {
+  flush_callbacks(get_tls());
 }
 
 void enter() {
@@ -192,7 +195,7 @@ void exit() {
 
   ctls->scope_count -= 1;
   if (ctls->scope_count == 0) [[likely]] {
-    flush_callbacks();
+    flush_callbacks(ctls);
     ctls->generation = std::numeric_limits<gen_t>::max();
   }
 }
