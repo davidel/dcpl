@@ -164,9 +164,8 @@ void purge() {
 }
 
 void flush_callbacks(rcu_tls* ctls) {
-  rcu_context* ctx = get_context();
-
   if (!ctls->callbacks.empty()) {
+    rcu_context* ctx = get_context();
     std::lock_guard guard(ctx->mtx);
 
     ctx->callbacks.emplace_back(ctx->generation.load() , std::move(ctls->callbacks));
