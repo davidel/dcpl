@@ -129,12 +129,12 @@ void purge() {
   DCPL_SLOG() << "Oldest thread RCU generation is " << mingen;
 
   for (auto it = ctx->callbacks.begin(); it != ctx->callbacks.end();) {
-    gen_callbacks* callbacks = &(*it);
+    const gen_callbacks& callbacks = *it;
 
-    if (mingen > callbacks->gen) {
-      DCPL_SLOG() << "Running RCU callbacks for generation " << callbacks->gen;
+    if (mingen > callbacks.gen) {
+      DCPL_SLOG() << "Running RCU callbacks for generation " << callbacks.gen;
 
-      for (const auto& cb : callbacks->callbacks) {
+      for (const auto& cb : callbacks.callbacks) {
         try {
           DCPL_SLOG() << "RCU callback for " << cb.data;
 
@@ -149,7 +149,7 @@ void purge() {
       ++it;
       ctx->callbacks.erase(eit);
     } else {
-      DCPL_SLOG() << "Skpping RCU callbacks for generation " << callbacks->gen;
+      DCPL_SLOG() << "Skpping RCU callbacks for generation " << callbacks.gen;
       ++it;
     }
   }
