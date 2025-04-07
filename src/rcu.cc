@@ -116,7 +116,17 @@ gen_t get_oldest_generation(rcu_context* ctx, rcu_tls* ctls) {
   return mingen;
 }
 
-void purge() {
+void flush_callbacks(rcu_tls* ctls) {
+  if (!ctls->callbacks.empty()) {
+    rcu_context* ctx = get_context();
+    std::lock_guard guard(ctx->mtx);
+
+    ctx->callbacks.emplace_back(ctx->generation.load() , std::move(ctls->callbacks));
+    ctls->callbacks.clear();
+  }
+}
+
+void purge_callbacks() {
   rcu_context* ctx = get_context();
   rcu_tls* ctls = get_tls();
   gen_t curgen = ctx->generation.fetch_add(1);
@@ -153,24 +163,15 @@ void purge() {
       ++it;
     }
   }
-
-  // When the RCU callbacks are called above, they might issue more callbacks,
-  // which will be queued in the purger thread. So here we flush them for the next
-  // round. We already hold the RCU context lock, taken by the above guard.
-  if (!ctls->callbacks.empty()) {
-    ctx->callbacks.emplace_back(ctx->generation.load() , std::move(ctls->callbacks));
-    ctls->callbacks.clear();
-  }
 }
 
-void flush_callbacks(rcu_tls* ctls) {
-  if (!ctls->callbacks.empty()) {
-    rcu_context* ctx = get_context();
-    std::lock_guard guard(ctx->mtx);
+void purge() {
+  purge_callbacks();
 
-    ctx->callbacks.emplace_back(ctx->generation.load() , std::move(ctls->callbacks));
-    ctls->callbacks.clear();
-  }
+  // When the RCU callbacks are called from within the purge_callbacks() API, they
+  // might issue more callbacks, which will be queued in the purger thread. So here
+  // we flush them for the next round.
+  rcu::flush_callbacks();
 }
 
 }
