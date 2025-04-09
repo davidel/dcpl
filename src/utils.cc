@@ -54,7 +54,7 @@ ns_time nstime() {
   std::chrono::time_point<std::chrono::high_resolution_clock, ns_time>
       now = std::chrono::high_resolution_clock::now();
 
-  return { now.time_since_epoch() };
+  return now.time_since_epoch();
 }
 
 double time() {
