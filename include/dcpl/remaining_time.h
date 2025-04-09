@@ -13,7 +13,7 @@ class remaining_time {
 
   ns_time estimate(T current_count) const {
     if (current_count >= count_) [[unlikely]] {
-      return 0;
+      return ns_time{ 0 };
     } else {
       ns_time now = nstime();
       ns_time step = (now - start_) / current_count;
