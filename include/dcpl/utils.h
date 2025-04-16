@@ -330,13 +330,15 @@ std::vector<T> sequence_comp(const E& ins, const F& fn) {
 
 template <typename B>
 std::vector<B> load_file(const std::string& path, bool binary = true) {
+  static_assert(sizeof(std::fstream::char_type) == sizeof(B));
+
   std::ios::openmode mode = binary ? std::ios::binary : std::ios::openmode{};
   std::fstream file = open(path, std::ios::in | mode);
   std::streampos fsize = stream_size(&file);
   std::vector<B> fdata(fsize, 0);
 
   file.seekg(0);
-  file.read(fdata.data(), fsize);
+  file.read(reinterpret_cast<std::fstream::char_type*>(fdata.data()), fsize);
 
   return fdata;
 }
