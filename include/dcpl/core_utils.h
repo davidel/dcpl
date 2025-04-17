@@ -336,8 +336,10 @@ auto pop_back(T* vec) {
 }
 
 template <typename T>
-auto to_span(const T& data) {
-  return std::span{ data.data(), data.size() };
+auto to_span(const T& data, std::size_t offset = 0) {
+  DCPL_CHECK_LE(offset, data.size());
+
+  return std::span{ data.data() + offset, data.size() - offset };
 }
 
 }
