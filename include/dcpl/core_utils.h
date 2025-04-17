@@ -327,5 +327,18 @@ std::vector<T> split_line(std::string_view data, char sep) {
   return splits;
 }
 
+template <typename T>
+auto pop_back(T* vec) {
+  auto value(std::move(vec->back()));
+
+  vec->pop_back();
+  return value;
+}
+
+template <typename T>
+auto to_span(const T& data) {
+  return std::span{ data.data(), data.size() };
+}
+
 }
 
