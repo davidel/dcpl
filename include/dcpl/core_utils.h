@@ -20,7 +20,9 @@
 // Dependencies must be limited!
 // The "dcpl/assert.h" include only depends on "dcpl/compiler.h" and "dcpl/pragmas.h"
 // which in turn have no dependencies.
+// The "dcpl/constants.h" in turn, has not local dependencies.
 #include "dcpl/assert.h"
+#include "dcpl/constants.h"
 
 namespace dcpl {
 
@@ -336,10 +338,13 @@ auto pop_back(T* vec) {
 }
 
 template <typename T>
-auto to_span(const T& data, std::size_t offset = 0) {
+auto to_span(const T& data, std::size_t offset = 0,
+             std::size_t size = dcpl::consts::all) {
   DCPL_CHECK_LE(offset, data.size());
 
-  return std::span{ data.data() + offset, data.size() - offset };
+  std::size_t ssize = std::min<std::size_t>(data.size() - offset, size);
+
+  return std::span{ data.data() + offset, ssize };
 }
 
 }
