@@ -21,6 +21,7 @@
 #include "dcpl/env.h"
 #include "dcpl/file.h"
 #include "dcpl/fs.h"
+#include "dcpl/hash.h"
 #include "dcpl/ivector.h"
 #include "dcpl/json/json.h"
 #include "dcpl/logging.h"
@@ -265,6 +266,12 @@ TEST(UtilTest, ToNumber) {
   auto sp = dcpl::to_span("1234");
 
   EXPECT_EQ(dcpl::to_number<int>(sp), 1234);
+}
+
+TEST(HashTest, API) {
+  std::size_t hash = dcpl::hash(17, 21.7, "ABC", std::string("XYZ"));
+
+  EXPECT_EQ(hash, 16171417201806314036U);
 }
 
 TEST(IVectorTest, IntTest) {

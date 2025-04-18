@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <functional>
 
 #include "dcpl/constants.h"
@@ -28,7 +29,7 @@ T hash_bytes(const void* ptr, std::size_t len, T seed) {
     });
 
   const char* buf = static_cast<const char*>(ptr);
-  const char* end = buf + len / sizeof(T);
+  const char* end = buf + (len / sizeof(T)) * sizeof(T);
   T hash = seed ^ (len * mul);
 
   for (const char* p = buf; p != end; p += sizeof(T)) {
@@ -59,6 +60,24 @@ T hash_bytes(const void* ptr, std::size_t len, T seed) {
   hash ^= hash >> shift_bits;
 
   return hash;
+}
+
+template <typename T>
+std::size_t hash(const T& v) {
+  std::hash<T> hasher;
+
+  return hasher(v);
+}
+
+static inline std::size_t hash(const char* v) {
+  return hash_bytes(v, std::strlen(v), static_cast<std::size_t>(0x4091934));
+}
+
+template <typename T, typename... ARGS>
+std::size_t hash(const T& v, ARGS&&... args) {
+  std::size_t hashes[] = { hash(v), hash(std::forward<ARGS>(args)...) };
+
+  return hash_bytes(hashes, sizeof(hashes), static_cast<std::size_t>(0x9e3779b9));
 }
 
 }
