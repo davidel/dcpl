@@ -160,11 +160,13 @@ std::string to_upper(const char* data);
 std::string to_lower(const char* data);
 
 template <typename T, typename S>
-std::span<T> reinterpret_span(std::span<S> source) {
-  static_assert((sizeof(T) >= sizeof(S) && sizeof(T) % sizeof(S) == 0) ||
-                sizeof(S) % sizeof(T) == 0, "Mismatching size");
+std::span<T> reinterpret_span(const S& source) {
+  static_assert((sizeof(T) >= sizeof(source[0]) && sizeof(T) % sizeof(source[0]) == 0) ||
+                sizeof(source[0]) % sizeof(T) == 0, "Mismatching size");
 
-  return std::span<T>{ reinterpret_cast<T*>(source.data()), source.size() };
+  return std::span<T>{
+    reinterpret_cast<T*>(source.data()),
+    (source.size() * sizeof(source[0])) / sizeof(T) };
 }
 
 template <typename T, typename S,
