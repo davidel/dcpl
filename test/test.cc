@@ -33,6 +33,7 @@
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
+#include "dcpl/suffix_array.h"
 #include "dcpl/temp_file.h"
 #include "dcpl/temp_path.h"
 #include "dcpl/thread.h"
@@ -861,6 +862,17 @@ TEST(RcuUnorderedMap, Concurrency) {
   for (int i = 0; i < num_inserts; ++i) {
     EXPECT_EQ(umap.count(i), 1);
   }
+}
+
+TEST(SuffixArray, Find) {
+  std::vector<unsigned int> data{ 17, 21, 44, 97, 10, 11, 65, 3, 11, 19 };
+  auto sa = dcpl::suffix_array::compute<std::uint32_t>(data);
+
+  dcpl::suffix_array::partition result =
+      dcpl::suffix_array::find(data, sa, dcpl::to_span(data, 2, 3),
+                               { 0, sa.size(), 0 });
+
+  EXPECT_NE(result.begin, result.end);
 }
 
 }
