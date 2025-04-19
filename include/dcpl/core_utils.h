@@ -161,7 +161,8 @@ std::string to_lower(const char* data);
 
 template <typename T, typename S>
 std::span<T> reinterpret_span(std::span<S> source) {
-  static_assert(sizeof(T) == sizeof(S), "Mismatching size");
+  static_assert((sizeof(T) >= sizeof(S) && sizeof(T) % sizeof(S) == 0) ||
+                sizeof(S) % sizeof(T) == 0, "Mismatching size");
 
   return std::span<T>{ reinterpret_cast<T*>(source.data()), source.size() };
 }
