@@ -891,7 +891,7 @@ TEST(MultiMergeSort, Basic) {
   ranges.emplace_back(v2.begin(), v2.end());
   ranges.emplace_back(v3.begin(), v3.end());
 
-  auto merged = dcpl::sort::multi_merge(ranges, std::less<int>());
+  std::vector<int> merged = dcpl::sort::multi_merge(ranges, std::less<int>());
 
   for (std::size_t i = 1; i < merged.size(); ++i) {
     EXPECT_LE(merged[i - 1], merged[i]);
