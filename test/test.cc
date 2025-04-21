@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <list>
 #include <numbers>
 #include <random>
 #include <sstream>
@@ -26,6 +27,7 @@
 #include "dcpl/json/json.h"
 #include "dcpl/logging.h"
 #include "dcpl/memory.h"
+#include "dcpl/multi_merge_sort.h"
 #include "dcpl/periodic_task.h"
 #include "dcpl/rcu/rcu.h"
 #include "dcpl/rcu/unordered_map.h"
@@ -873,6 +875,27 @@ TEST(SuffixArray, Find) {
                                { 0, sa.size(), 0 });
 
   EXPECT_NE(result.begin, result.end);
+}
+
+TEST(MultiMergeSort, Basic) {
+  std::vector<int> v1{ 1, 4, 7, 10 };
+  std::vector<int> v2{ 2, 5, 8, 11 };
+  std::vector<int> v3{ 3, 6, 9, 12 };
+
+  using it_type = decltype(v1)::const_iterator;
+  using range_type = dcpl::sort::range<it_type>;
+
+  std::list<range_type> ranges;
+
+  ranges.emplace_back(v1.begin(), v1.end());
+  ranges.emplace_back(v2.begin(), v2.end());
+  ranges.emplace_back(v3.begin(), v3.end());
+
+  auto merged = dcpl::sort::multi_merge(ranges, std::less<int>());
+
+  for (std::size_t i = 1; i < merged.size(); ++i) {
+    EXPECT_LE(merged[i - 1], merged[i]);
+  }
 }
 
 }
