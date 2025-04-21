@@ -32,6 +32,7 @@
 #include "dcpl/rcu/rcu.h"
 #include "dcpl/rcu/unordered_map.h"
 #include "dcpl/rcu/vector.h"
+#include "dcpl/sequence.h"
 #include "dcpl/stdns_override.h"
 #include "dcpl/storage_span.h"
 #include "dcpl/string_formatter.h"
@@ -896,6 +897,15 @@ TEST(MultiMergeSort, Basic) {
   for (std::size_t i = 1; i < merged.size(); ++i) {
     EXPECT_LE(merged[i - 1], merged[i]);
   }
+}
+
+TEST(Sequence, Levenshtein) {
+  std::vector<int> s1{ 1, 2, 3, 4, 5, 6 };
+  std::vector<int> s2{ 2, 3, 9, 4, 5, 6, 7 };
+
+  std::size_t dist = dcpl::levenshtein(s1, s2);
+
+  EXPECT_EQ(dist, 3);
 }
 
 }
