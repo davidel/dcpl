@@ -27,7 +27,7 @@ C levenshtein(const T& s1, const S& s2, const edit_costs<C>& costs) {
   step_iota(prev, current, static_cast<C>(0), costs.deletion);
 
   for (std::size_t i = 1; i <= s1.size(); ++i) {
-    current[0] = i;
+    current[0] = costs.insertion;
 
     for (std::size_t j = 1; j <= size2; ++j) {
       C cost = (s1[i - 1] == s2[j - 1]) ? static_cast<C>(0) : costs.substitution;
