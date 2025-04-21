@@ -13,5 +13,8 @@ struct one_of : std::disjunction<std::is_same<T, Ts>...> { };
 template <typename T, typename... Ts>
 constexpr bool one_of_v = one_of<T, Ts...>::value;
 
+template <typename C>
+using container_type = remove_cvr<decltype(*(std::declval<C&>().begin()))>;
+
 }
 
