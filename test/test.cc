@@ -902,10 +902,11 @@ TEST(MultiMergeSort, Basic) {
 TEST(Sequence, Levenshtein) {
   std::vector<int> s1{ 1, 2, 3, 4, 5, 6 };
   std::vector<int> s2{ 2, 3, 9, 4, 5, 6, 7 };
+  dcpl::sequence::edit_costs<double> costs;
 
-  std::size_t dist = dcpl::levenshtein(s1, s2);
+  double dist = dcpl::sequence::levenshtein(s1, s2, costs);
 
-  EXPECT_EQ(dist, 3);
+  EXPECT_EQ(dist, 3.0);
 }
 
 }

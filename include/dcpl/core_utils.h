@@ -83,6 +83,16 @@ T sum(const C& data) {
   return std::accumulate(data.begin(), data.end(), static_cast<T>(0), std::plus<T>());
 }
 
+template <typename I, typename T, typename S>
+void step_iota(I begin, I end, T base, S step) {
+  T value(base);
+
+  for (I pos = begin; pos != end; ++pos) {
+    *pos = value;
+    value = value + static_cast<T>(step);
+  }
+}
+
 template<typename T, typename C>
 std::unordered_map<typename C::value_type, T> unique_count(const C& data) {
   std::unordered_map<typename C::value_type, T> uniq;
