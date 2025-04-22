@@ -11,6 +11,8 @@
 #include <thread>
 #include <vector>
 
+#include "dcpl/constants.h"
+
 namespace dcpl {
 namespace detail {
 
@@ -174,9 +176,19 @@ std::size_t effective_num_threads(std::size_t num_threads, std::size_t paralleli
 
 template <typename I, typename T, typename C>
 std::vector<T> map(const std::function<T (C&)>& fn, I start, I end,
-                   std::size_t num_threads = 0) {
+                   std::size_t num_threads = consts::all) {
   std::size_t num_results = std::distance(start, end);
-  threadpool pool(effective_num_threads(num_threads, num_results));
+  std::unique_ptr<threadpool> pool_ptr;
+  threadpool* pool = nullptr;
+
+  if (num_threads == consts::all) {
+    pool = threadpool::get();
+  } else {
+    pool_ptr = std::make_unique<threadpool>(effective_num_threads(num_threads,
+                                                                  num_results));
+    pool = pool_ptr.get();
+  }
+
   detail::multi_result<T> mresult(num_results);
   std::size_t i = 0;
 
@@ -192,7 +204,7 @@ std::vector<T> map(const std::function<T (C&)>& fn, I start, I end,
       mresult.set(i, std::move(result));
     };
 
-    pool.push_work(std::move(map_fn));
+    pool->push_work(std::move(map_fn));
   }
 
   mresult.wait();
