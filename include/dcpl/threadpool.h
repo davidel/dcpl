@@ -193,9 +193,7 @@ std::vector<T> map(const std::function<T (C&)>& fn, I start, I end,
   std::size_t i = 0;
 
   for (I it = start; it != end; ++it, ++i) {
-    auto& value = *it;
-
-    auto map_fn = [&fn, &mresult, &value, i]() {
+    auto map_fn = [&fn, &mresult, value = *it, i]() {
       detail::result<T> result = detail::run<T>(
           [&fn, &value]() -> T {
             return fn(value);
