@@ -193,13 +193,13 @@ std::vector<T> map(const std::function<T (C&)>& fn, I start, I end,
   std::size_t i = 0;
 
   for (I it = start; it != end; ++it, ++i) {
-    auto map_fn = [&fn, &mresult, value = *it, i]() {
+    auto map_fn = [&fn, &mresult, value = *it, index = i]() {
       detail::result<T> result = detail::run<T>(
           [&fn, &value]() -> T {
             return fn(value);
           });
 
-      mresult.set(i, std::move(result));
+      mresult.set(index, std::move(result));
     };
 
     pool->push_work(std::move(map_fn));
