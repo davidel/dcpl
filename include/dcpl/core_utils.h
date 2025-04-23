@@ -88,7 +88,7 @@ void linspace(I begin, I end, T base, S step) {
   T value(base);
 
   for (I pos = begin; pos != end; ++pos) {
-    *pos = value;
+    *pos = static_cast<decltype(*pos)>(value);
     value = value + static_cast<T>(step);
   }
 }

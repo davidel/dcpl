@@ -909,6 +909,18 @@ TEST(Sequence, Levenshtein) {
   EXPECT_EQ(dist, 3.0);
 }
 
+TEST(Linspace, API) {
+  const float base = 17.21;
+  const float step = 21.17;
+  std::vector<float> linspace = dcpl::linspace<float>(8, base, step);
+  float current = base;
+
+  for (const auto& v : linspace) {
+    EXPECT_EQ(current, v);
+    current += step;
+  }
+}
+
 }
 
 int main(int argc, char **argv) {
