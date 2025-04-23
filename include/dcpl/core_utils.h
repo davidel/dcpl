@@ -84,7 +84,7 @@ T sum(const C& data) {
 }
 
 template <typename I, typename T, typename S>
-void step_iota(I begin, I end, T base, S step) {
+void linspace(I begin, I end, T base, S step) {
   T value(base);
 
   for (I pos = begin; pos != end; ++pos) {

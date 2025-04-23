@@ -54,13 +54,22 @@ std::vector<T> reduce_indices(std::span<const T> indices, const bitmap& bmap) {
   return rindices;
 }
 
-template <typename T = std::size_t>
+template <typename T>
 std::vector<T> iota(std::size_t size, T base = 0) {
-  std::vector<T> indices(size);
+  std::vector<T> values(size);
 
-  std::iota(indices.begin(), indices.end(), base);
+  std::iota(values.begin(), values.end(), base);
 
-  return indices;
+  return values;
+}
+
+template <typename T, typename B, typename S>
+std::vector<T> linspace(std::size_t size, B base, S step) {
+  std::vector<T> values(size);
+
+  linspace(values.begin(), values.end(), static_cast<T>(base), static_cast<T>(step));
+
+  return values;
 }
 
 std::string_view read_line(std::string_view* data);
@@ -166,7 +175,7 @@ std::size_t choice(const T& probs, G* rgen, bool normalize = false) {
 
 template<typename T, typename F>
 std::vector<std::size_t> argsort(const T& array, const F& cmp) {
-  std::vector<std::size_t> indices = iota(array.size());
+  std::vector<std::size_t> indices = iota<std::size_t>(array.size());
 
   std::sort(indices.begin(), indices.end(),
             [&array, &cmp](std::size_t left, std::size_t right) {
@@ -214,7 +223,7 @@ std::vector<std::size_t> resample(std::size_t size, std::size_t count, G* rgen,
   std::vector<std::size_t> indices;
 
   if (count == consts::all) {
-    indices = iota(size);
+    indices = iota<std::size_t>(size);
   } else {
     std::size_t ecount = std::min(count, size);
     bitmap mask(size, false);

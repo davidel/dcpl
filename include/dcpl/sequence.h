@@ -24,7 +24,7 @@ C levenshtein(const T& s1, const S& s2, const edit_costs<C>& costs) {
   C* prev = storage.get();
   C* current = prev + (size2 + 1);
 
-  step_iota(prev, current, static_cast<C>(0), costs.deletion);
+  linspace(prev, current, static_cast<C>(0), costs.deletion);
 
   for (std::size_t i = 1; i <= s1.size(); ++i) {
     current[0] = costs.insertion;
