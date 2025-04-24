@@ -910,6 +910,27 @@ TEST(Sequence, Levenshtein) {
   EXPECT_EQ(dist, 3.0);
 }
 
+TEST(Sequence, EditOperations) {
+  std::vector<int> s1{ 1, 2, 3, 4, 5, 6 };
+  std::vector<int> s2{ 2, 3, 9, 4, 5, 6, 7 };
+
+  auto edit_ops = dcpl::sequence::compute_edits(s1, s2);
+
+  EXPECT_EQ(edit_ops.size(), 3);
+
+  EXPECT_EQ(edit_ops[0].mode, dcpl::sequence::edit_mode::insert);
+  EXPECT_EQ(edit_ops[0].pos1, 6);
+  EXPECT_EQ(edit_ops[0].pos2, 6);
+
+  EXPECT_EQ(edit_ops[1].mode, dcpl::sequence::edit_mode::insert);
+  EXPECT_EQ(edit_ops[1].pos1, 3);
+  EXPECT_EQ(edit_ops[1].pos2, 2);
+
+  EXPECT_EQ(edit_ops[2].mode, dcpl::sequence::edit_mode::remove);
+  EXPECT_EQ(edit_ops[2].pos1, 0);
+  EXPECT_EQ(edit_ops[2].pos2, 0);
+}
+
 TEST(Linspace, API) {
   const float base = 17.21;
   const float step = 21.17;
