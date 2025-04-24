@@ -19,6 +19,7 @@
 #include "dcpl/cleanup.h"
 #include "dcpl/coro/coro.h"
 #include "dcpl/coro/utils.h"
+#include "dcpl/dyn_tensor.h"
 #include "dcpl/env.h"
 #include "dcpl/file.h"
 #include "dcpl/fs.h"
@@ -918,6 +919,32 @@ TEST(Linspace, API) {
   for (const auto& v : linspace) {
     EXPECT_EQ(current, v);
     current += step;
+  }
+}
+
+TEST(DynTensor, basic) {
+  const std::size_t m = 8;
+  const std::size_t n = 5;
+  dcpl::dyn_tensor<float> tensor({ m, n });
+
+  EXPECT_EQ(tensor.numel(), m * n);
+  EXPECT_EQ(tensor.sizes().size(), 2);
+  EXPECT_EQ(tensor.sizes()[0], m);
+  EXPECT_EQ(tensor.sizes()[1], n);
+
+  decltype(tensor)::value_type base = 0.0f;
+
+  for (std::size_t i = 0; i < m; ++i) {
+    for (std::size_t j = 0; j < n; ++j) {
+      tensor(i, j) = base;
+      base += 1.0f;
+    }
+  }
+  for (std::size_t i = m; i > 0; --i) {
+    for (std::size_t j = n; j > 0; --j) {
+      base -= 1.0f;
+      EXPECT_EQ(tensor(i - 1, j - 1), base);
+    }
   }
 }
 
