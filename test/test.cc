@@ -948,10 +948,12 @@ TEST(DynTensor, basic) {
   const std::size_t n = 5;
   dcpl::dyn_tensor<float> tensor({ m, n });
 
-  EXPECT_EQ(tensor.numel(), m * n);
-  EXPECT_EQ(tensor.sizes().size(), 2);
-  EXPECT_EQ(tensor.sizes()[0], m);
-  EXPECT_EQ(tensor.sizes()[1], n);
+  EXPECT_EQ(tensor.size(), m * n);
+  EXPECT_EQ(tensor.size(0), m);
+  EXPECT_EQ(tensor.size(1), n);
+  EXPECT_EQ(tensor.shape().size(), 2);
+  EXPECT_EQ(tensor.shape()[0], m);
+  EXPECT_EQ(tensor.shape()[1], n);
 
   decltype(tensor)::value_type base = 0.0f;
 

@@ -17,20 +17,28 @@ class dyn_tensor {
   using value_type = T;
 
   template <typename D>
-  explicit dyn_tensor(const D& dims) :
+  explicit dyn_tensor(const D& dims, T init = T{}) :
       dims_(dims.begin(), dims.end()),
       strides_(compute_strides(dims)),
-      data_(calc_size(dims)) {
+      data_(calc_size(dims), init) {
   }
 
   template <typename V>
-  explicit dyn_tensor(const std::initializer_list<V>& dims) :
+  explicit dyn_tensor(const std::initializer_list<V>& dims, T init = T{}) :
       dims_(dims.begin(), dims.end()),
       strides_(compute_strides(dims)),
-      data_(calc_size(dims)) {
+      data_(calc_size(dims), init) {
   }
 
-  std::span<const std::size_t> sizes() const {
+  std::size_t size() const {
+    return calc_size(dims_);
+  }
+
+  std::size_t size(std::size_t dim) const {
+    return dims_.at(dim);
+  }
+
+  std::span<const std::size_t> shape() const {
     return { dims_.data(), dims_.size() };
   }
 
@@ -40,10 +48,6 @@ class dyn_tensor {
 
   std::span<const T> data() const {
     return { data_.data(), data_.size() };
-  }
-
-  std::size_t numel() const {
-    return calc_size(dims_);
   }
 
   template <typename... ARGS>
@@ -65,10 +69,10 @@ class dyn_tensor {
   std::size_t compute_index(ARGS... args) const {
     std::size_t index = 0;
     std::size_t i = strides_.size();
-   
-    for (auto ind : { args... }) {
+
+    for (auto ind : { static_cast<std::size_t>(args)... }) {
       DCPL_CHECK_LT(ind, dims_[dims_.size() - i]);
-      index += static_cast<std::size_t>(ind) * strides_[i - 1];
+      index += ind * strides_[i - 1];
       --i;
     }
 
