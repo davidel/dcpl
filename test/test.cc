@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -943,7 +944,7 @@ TEST(Linspace, API) {
   }
 }
 
-TEST(DynTensor, basic) {
+TEST(DynTensor, Basic) {
   const std::size_t m = 8;
   const std::size_t n = 5;
   dcpl::dyn_tensor<float> tensor({ m, n });
@@ -969,6 +970,20 @@ TEST(DynTensor, basic) {
       EXPECT_EQ(tensor(i - 1, j - 1), base);
     }
   }
+}
+
+TEST(DynTensor, FromSizeArray) {
+  const std::size_t m = 17;
+  const std::size_t n = 21;
+  std::array sizes{ m, n };
+  dcpl::dyn_tensor<float> tensor(sizes);
+
+  EXPECT_EQ(tensor.size(), m * n);
+  EXPECT_EQ(tensor.size(0), m);
+  EXPECT_EQ(tensor.size(1), n);
+  EXPECT_EQ(tensor.shape().size(), 2);
+  EXPECT_EQ(tensor.shape()[0], m);
+  EXPECT_EQ(tensor.shape()[1], n);
 }
 
 }
