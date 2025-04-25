@@ -64,20 +64,25 @@ class dyn_tensor {
   }
 
  private:
-  template <typename... ARGS>
-  std::size_t compute_index(ARGS... args) const {
-    const std::size_t* strides = strides_.data();
-    const std::size_t* dims = dims_.data();
+  template <typename I, typename... ARGS>
+  static std::size_t dyn_index(std::size_t i, const std::size_t* strides,
+                               const std::size_t* dims, const I& v,
+                               ARGS... args) {
     std::size_t index = 0;
 
-    for (auto ind : { static_cast<std::size_t>(args)... }) {
-      DCPL_CHECK_LT(ind, *dims);
-      index += ind * (*strides);
-      ++strides;
-      ++dims;
+    if constexpr (sizeof...(args) > 0) {
+      index += dyn_index(i + 1, strides, dims, args...);
     }
+    DCPL_CHECK_LT(v, dims[i]) << "Index out of bounds";
+
+    index += strides[i] * static_cast<std::size_t>(v);
 
     return index;
+  }
+
+  template <typename... ARGS>
+  std::size_t compute_index(ARGS... args) const {
+    return dyn_index(0, strides_.data(), dims_.data(), args...);
   }
 
   template <typename D>
