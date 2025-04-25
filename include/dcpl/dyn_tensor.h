@@ -23,8 +23,7 @@ class dyn_tensor {
       data_(calc_size(dims), init) {
   }
 
-  template <typename V>
-  explicit dyn_tensor(const std::initializer_list<V>& dims, T init = T{}) :
+  explicit dyn_tensor(std::initializer_list<std::size_t> dims, T init = T{}) :
       dims_(dims.begin(), dims.end()),
       strides_(compute_strides(dims)),
       data_(calc_size(dims), init) {
