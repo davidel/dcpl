@@ -970,6 +970,13 @@ TEST(DynTensor, Basic) {
       EXPECT_EQ(tensor(i - 1, j - 1), base);
     }
   }
+
+  EXPECT_THROW({
+      tensor(m + 1, n - 1);
+    }, std::runtime_error);
+  EXPECT_THROW({
+      tensor(m - 1, n + 1);
+    }, std::runtime_error);
 }
 
 TEST(DynTensor, FromSizeArray) {
