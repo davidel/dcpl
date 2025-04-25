@@ -27,7 +27,7 @@ class format {
     if (size < sizeof(sbuf)) {
       stream << sbuf;
     } else {
-      std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size + 1);
+      std::unique_ptr<char[]> buffer(new char[size + 1]);
 
       std::snprintf(buffer.get(), size + 1, fmt.fmt_, fmt.value_);
       stream << buffer.get();

@@ -42,22 +42,37 @@ struct asserter : public base_asserter {
   bool needs_separator = true;
 };
 
-#define DCPL_DEFCHECK(name, op)                                         \
+#define DCPL_DEFERROR(name, op)                                         \
   template <typename T1, typename T2>                                   \
-  std::unique_ptr<asserter<>> name##_check(const T1& v1, const T2& v2,  \
+  std::unique_ptr<asserter<>> name##_error(const T1& v1, const T2& v2,  \
                                            const char* s1, const char* s2) { \
-    DCPL_WARNPUSH;                                                      \
-    DCPL_WARNOFF_SIGN_COMPARE;                                          \
-    if (v1 op v2) [[likely]] {                                          \
-      return nullptr;                                                   \
-    }                                                                   \
-    DCPL_WARNPOP;                                                       \
     auto astr = std::make_unique<asserter<>>("Check failed: ",          \
                                              /*needs_separator=*/ false); \
     *astr << s1 << " " #op " " << s2 << " (" << v1 << " " #op " " << v2 << ")"; \
     astr->needs_separator = true;                                       \
     return astr;                                                        \
   }
+
+#define DCPL_DEFCHECK(name, op)                                         \
+  template <typename T1, typename T2>                                   \
+  inline std::unique_ptr<asserter<>> name##_check(const T1& v1, const T2& v2, \
+                                                  const char* s1, const char* s2) { \
+    DCPL_WARNPUSH;                                                      \
+    DCPL_WARNOFF_SIGN_COMPARE;                                          \
+    if (v1 op v2) [[likely]] {                                          \
+      return nullptr;                                                   \
+    }                                                                   \
+    DCPL_WARNPOP;                                                       \
+                                                                        \
+    return name##_error(v1, v2, s1, s2);                                \
+  }
+
+DCPL_DEFERROR(EQ, ==);
+DCPL_DEFERROR(NE, !=);
+DCPL_DEFERROR(LT, <);
+DCPL_DEFERROR(LE, <=);
+DCPL_DEFERROR(GT, >);
+DCPL_DEFERROR(GE, >=);
 
 DCPL_DEFCHECK(EQ, ==);
 DCPL_DEFCHECK(NE, !=);
