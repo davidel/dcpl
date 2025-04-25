@@ -67,13 +67,15 @@ class dyn_tensor {
  private:
   template <typename... ARGS>
   std::size_t compute_index(ARGS... args) const {
+    const std::size_t* strides = strides_.data() + strides_.size() - 1;
+    const std::size_t* dims = dims_.data();
     std::size_t index = 0;
-    std::size_t i = strides_.size();
 
     for (auto ind : { static_cast<std::size_t>(args)... }) {
-      DCPL_CHECK_LT(ind, dims_[dims_.size() - i]);
-      index += ind * strides_[i - 1];
-      --i;
+      DCPL_CHECK_LT(ind, *dims);
+      index += ind * (*strides);
+      --strides;
+      ++dims;
     }
 
     return index;
