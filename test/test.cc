@@ -928,7 +928,7 @@ TEST(Sequence, EditOperations) {
 
   EXPECT_EQ(edit_ops[2].mode, dcpl::sequence::edit_mode::remove);
   EXPECT_EQ(edit_ops[2].pos1, 0);
-  EXPECT_EQ(edit_ops[2].pos2, 0);
+  EXPECT_EQ(edit_ops[2].pos2, dcpl::consts::invalid_index);
 }
 
 TEST(Linspace, API) {

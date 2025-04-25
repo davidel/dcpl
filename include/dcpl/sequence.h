@@ -6,6 +6,7 @@
 #include <numeric>
 #include <vector>
 
+#include "dcpl/constants.h"
 #include "dcpl/core_utils.h"
 #include "dcpl/dyn_tensor.h"
 
@@ -55,8 +56,8 @@ enum class edit_mode {
 
 struct edit_operation {
   edit_mode mode = edit_mode::noop;
-  std::size_t pos1 = 0;
-  std::size_t pos2 = 0;
+  std::size_t pos1 = consts::invalid_index;
+  std::size_t pos2 = consts::invalid_index;
 };
 
 template <typename T, typename S>
