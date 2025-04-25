@@ -75,9 +75,7 @@ class dyn_tensor {
     }
     DCPL_CHECK_LT(v, dims[i]) << "Index out of bounds";
 
-    index += strides[i] * static_cast<std::size_t>(v);
-
-    return index;
+    return index + strides[i] * static_cast<std::size_t>(v);
   }
 
   template <typename... ARGS>
