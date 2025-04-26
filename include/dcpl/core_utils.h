@@ -20,9 +20,10 @@
 // Dependencies must be limited!
 // The "dcpl/assert.h" include only depends on "dcpl/compiler.h" and "dcpl/pragmas.h"
 // which in turn have no dependencies.
-// The "dcpl/constants.h" in turn, has not local dependencies.
+// The "dcpl/constants.h" and "dcpl/type_traits.h" in turn, have not local dependencies.
 #include "dcpl/assert.h"
 #include "dcpl/constants.h"
+#include "dcpl/type_traits.h"
 
 namespace dcpl {
 
@@ -184,7 +185,7 @@ template <typename T, typename S,
 T c_cast(S value) {
   using NP = std::remove_pointer_t<S>;
 
-  return reinterpret_cast<T>(const_cast<std::remove_cv_t<NP>*>(value));
+  return reinterpret_cast<T>(const_cast<remove_cvr<NP>*>(value));
 }
 
 template <typename T, typename S,
@@ -196,7 +197,7 @@ T c_cast(S value) {
 template <typename T, typename S,
           std::enable_if_t<std::is_integral_v<T>, T>* = nullptr,
           std::enable_if_t<std::is_integral_v<S>, S>* = nullptr>
-T int_cast(const S& value) {
+T int_cast(S value) {
   T t_cast = static_cast<T>(value);
 
   DCPL_CHECK_EQ(value, static_cast<S>(t_cast));
