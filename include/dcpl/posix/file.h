@@ -38,7 +38,7 @@ class file {
     }
 
     operator std::string_view() const {
-      std::span<char> mdata = data();
+      auto mdata = data<std::string_view::value_type>();
 
       return { mdata.data(), mdata.size() };
     }
