@@ -35,6 +35,8 @@ std::string type_name() {
 #define DCPL_LIKELY(cond) __builtin_expect(!!(cond), true)
 #define DCPL_UNLIKELY(cond) __builtin_expect(!!(cond), false)
 
+#define DCPL_INLINE inline __attribute__((always_inline))
+
 #else // defined(__GNUC__) || defined(__clang__)
 
 namespace dcpl {
@@ -52,6 +54,9 @@ std::string type_name() {
 
 #define DCPL_LIKELY(cond) (cond)
 #define DCPL_UNLIKELY(cond) (cond)
+
+// This could be __forceinline if MSVC.
+#define DCPL_INLINE inline
 
 #endif // defined(__GNUC__) || defined(__clang__)
 

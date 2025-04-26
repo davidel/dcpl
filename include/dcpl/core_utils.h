@@ -128,6 +128,39 @@ typename T::mapped_type get_or(const T& data, const typename T::key_type& key,
   return (value != nullptr) ? *value : std::move(defval);
 }
 
+template <typename T, typename S>
+std::span<T> reinterpret_span(const S& source) {
+  static_assert((sizeof(T) >= sizeof(source[0]) && sizeof(T) % sizeof(source[0]) == 0) ||
+                sizeof(source[0]) % sizeof(T) == 0, "Mismatching size");
+
+  return std::span<T>{
+    reinterpret_cast<T*>(source.data()),
+    (source.size() * sizeof(source[0])) / sizeof(T) };
+}
+
+template <typename T, typename S,
+          typename std::enable_if_t<std::is_pointer_v<S>>* = nullptr>
+T c_cast(S value) {
+  using NP = std::remove_pointer_t<S>;
+
+  return reinterpret_cast<T>(const_cast<remove_cvr<NP>*>(value));
+}
+
+template <typename T, typename S,
+          typename std::enable_if_t<!std::is_pointer_v<S>>* = nullptr>
+T c_cast(S value) {
+  return reinterpret_cast<T>(value);
+}
+
+template <typename T, typename S>
+T int_cast(S value) {
+  T t_cast = static_cast<T>(value);
+
+  DCPL_CHECK_EQ(value, static_cast<S>(t_cast));
+
+  return t_cast;
+}
+
 template<typename T, typename C>
 std::vector<T> to_vector(const C& data) {
   return std::vector<T>(data.begin(), data.end());
@@ -135,11 +168,25 @@ std::vector<T> to_vector(const C& data) {
 
 template <typename T, typename C>
 std::vector<T> to_vector_cast(const C& data) {
-  std::vector<T> dest;
+  std::vector<T> dest(data.size());
+  auto pos = dest.begin();
 
-  dest.reserve(data.size());
   for (const auto& value : data) {
-    dest.push_back(static_cast<T>(value));
+    *pos = static_cast<T>(value);
+    ++pos;
+  }
+
+  return dest;
+}
+
+template <typename T, typename C>
+std::vector<T> to_vector_intcast(const C& data) {
+  std::vector<T> dest(data.size());
+  auto pos = dest.begin();
+
+  for (const auto& value : data) {
+    *pos = int_cast<T>(value);
+    ++pos;
   }
 
   return dest;
@@ -169,41 +216,6 @@ std::string to_lower(const T& data) {
 std::string to_upper(const char* data);
 
 std::string to_lower(const char* data);
-
-template <typename T, typename S>
-std::span<T> reinterpret_span(const S& source) {
-  static_assert((sizeof(T) >= sizeof(source[0]) && sizeof(T) % sizeof(source[0]) == 0) ||
-                sizeof(source[0]) % sizeof(T) == 0, "Mismatching size");
-
-  return std::span<T>{
-    reinterpret_cast<T*>(source.data()),
-    (source.size() * sizeof(source[0])) / sizeof(T) };
-}
-
-template <typename T, typename S,
-          typename std::enable_if_t<std::is_pointer_v<S>>* = nullptr>
-T c_cast(S value) {
-  using NP = std::remove_pointer_t<S>;
-
-  return reinterpret_cast<T>(const_cast<remove_cvr<NP>*>(value));
-}
-
-template <typename T, typename S,
-          typename std::enable_if_t<!std::is_pointer_v<S>>* = nullptr>
-T c_cast(S value) {
-  return reinterpret_cast<T>(value);
-}
-
-template <typename T, typename S,
-          std::enable_if_t<std::is_integral_v<T>, T>* = nullptr,
-          std::enable_if_t<std::is_integral_v<S>, S>* = nullptr>
-T int_cast(S value) {
-  T t_cast = static_cast<T>(value);
-
-  DCPL_CHECK_EQ(value, static_cast<S>(t_cast));
-
-  return t_cast;
-}
 
 template <typename T>
 std::span<char> to_string(const T& value, std::span<char> buf,
