@@ -8,19 +8,15 @@ struct bit_field {
   using value_type = T;
 
   constexpr T mask() const {
-    return (static_cast<T>(1) << count) - 1;
-  }
-
-  constexpr T smask() const {
-    return mask() << pos;
+    return ((static_cast<T>(1) << count) - 1) << pos;
   }
 
   constexpr T get_value(T value) const {
-    return (value >> pos) & mask();
+    return (value & mask()) >> pos;
   }
 
   constexpr T set_value(T src, T value) const {
-    return (src & ~(mask() << pos)) | ((value & mask()) << pos);
+    return (src & ~mask()) | ((value << pos) & mask());
   }
 
   unsigned int pos = 0;

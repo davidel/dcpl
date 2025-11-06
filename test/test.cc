@@ -46,6 +46,7 @@
 #include "dcpl/types.h"
 #include "dcpl/utils.h"
 #include "dcpl/varint.h"
+#include "dcpl/bit_field.h"
 
 namespace dcpl_test {
 
@@ -491,6 +492,17 @@ TEST(VarintTest, API) {
   std::vector<dcpl::umaxint_t> dvec = dcpl::varint_vec_decode<dcpl::umaxint_t>(enc_data);
 
   EXPECT_EQ(ivec, dvec);
+}
+
+TEST(BitField, API) {
+  const std::size_t value = (5 << 9) | (3 << 5) | 6;
+  const dcpl::bit_field<> bf1{0, 5};
+  const dcpl::bit_field<> bf2{5, 4};
+  const dcpl::bit_field<> bf3{9, 5};
+
+  EXPECT_EQ(bf1.get_value(value), 6);
+  EXPECT_EQ(bf2.get_value(value), 3);
+  EXPECT_EQ(bf3.get_value(value), 5);
 }
 
 TEST(ToStringTest, API) {
