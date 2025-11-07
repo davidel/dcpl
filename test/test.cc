@@ -500,9 +500,17 @@ TEST(BitField, API) {
   const dcpl::bit_field<> bf2{5, 4};
   const dcpl::bit_field<> bf3{9, 5};
 
-  EXPECT_EQ(bf1.get_value(value), 6);
-  EXPECT_EQ(bf2.get_value(value), 3);
-  EXPECT_EQ(bf3.get_value(value), 5);
+  EXPECT_EQ(bf1.get(value), 6);
+  EXPECT_EQ(bf2.get(value), 3);
+  EXPECT_EQ(bf3.get(value), 5);
+
+  std::size_t value1 = bf1.set(value, 5);
+  std::size_t value2 = bf2.set(value1, 2);
+  std::size_t value3 = bf3.set(value2, 11);
+
+  EXPECT_EQ(bf1.get(value1), 5);
+  EXPECT_EQ(bf2.get(value2), 2);
+  EXPECT_EQ(bf3.get(value3), 11);
 }
 
 TEST(ToStringTest, API) {

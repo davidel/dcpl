@@ -11,11 +11,11 @@ struct bit_field {
     return ((static_cast<T>(1) << count) - 1) << pos;
   }
 
-  constexpr T get_value(T value) const {
+  constexpr T get(T value) const {
     return (value & mask()) >> pos;
   }
 
-  constexpr T set_value(T src, T value) const {
+  constexpr T set(T src, T value) const {
     return (src & ~mask()) | ((value << pos) & mask());
   }
 
