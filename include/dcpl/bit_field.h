@@ -37,6 +37,10 @@ struct bit_setter {
     return value;
   }
 
+  T update(T input_value) const {
+    return (input_value & ~mask) | value;
+  }
+
   T value = 0;
   T mask = 0;
 };
