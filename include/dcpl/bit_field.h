@@ -7,15 +7,15 @@ template <typename T = std::size_t>
 struct bit_field {
   using value_type = T;
 
-  constexpr T mask() const {
+  T mask() const {
     return ((static_cast<T>(1) << count) - 1) << pos;
   }
 
-  constexpr T get(T value) const {
+  T get(T value) const {
     return (value & mask()) >> pos;
   }
 
-  constexpr T set(T src, T value) const {
+  T set(T src, T value) const {
     return (src & ~mask()) | ((value << pos) & mask());
   }
 

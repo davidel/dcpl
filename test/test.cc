@@ -513,6 +513,21 @@ TEST(BitField, API) {
   EXPECT_EQ(bf3.get(value3), 11);
 }
 
+TEST(BitField, Setter) {
+  const dcpl::bit_field<> bf1{0, 5};
+  const dcpl::bit_field<> bf2{5, 4};
+  const dcpl::bit_field<> bf3{9, 5};
+  dcpl::bit_setter<> bset;
+
+  bset.set(bf1, 6);
+  bset.set(bf2, 3);
+  bset.set(bf3, 5);
+
+  const std::size_t value = (5 << 9) | (3 << 5) | 6;
+
+  EXPECT_EQ(bset.update(0), value);
+}
+
 TEST(ToStringTest, API) {
   dcpl::umaxint_t v = static_cast<dcpl::umaxint_t>(182738918229102212);
   std::stringstream ss;
