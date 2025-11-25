@@ -450,7 +450,8 @@ TEST(ThreadPoolTest, API) {
     return ref + value;
   };
 
-  std::vector<float> results = dcpl::map(fn, values.begin(), values.end());
+  std::vector<float> results = dcpl::map(fn, values.begin(), values.end(),
+                                         /*num_threads=*/ 4);
 
   for (std::size_t i = 0; i < values.size(); ++i) {
     EXPECT_EQ(results[i], values[i] + ref);
